@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ShopHub</title>
+</head>
+<body>
+    <h1>Welcome to ShopHub</h1>
+    <p>This is our e-commerce website.</p>
+    <h2>Products</h2>
+    {% for item in products %}
+        <p>{{ item.name }} </p>
+        <p>Price: Rs.{{ item.price }} </p>
+    {% endfor %}
+
+</body>
+</html>
