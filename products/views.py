@@ -10,6 +10,9 @@ def home(request):
     return render(request, "products/home.html", {"products": product})
 
 def product_form(request):
-    form = ProductForm()
+    if request.method == "POST":
+        print("Form Submitted")
+
+    form = ProductForm()     
     context = {"form": form}
     return render(request, "products/product_create.html", context)
