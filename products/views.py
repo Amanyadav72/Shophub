@@ -11,8 +11,22 @@ def home(request):
 
 def product_form(request):
     if request.method == "POST":
-        print("Form Submitted")
-
-    form = ProductForm()     
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            print("Form is Valid")
+            product = Product(
+                name=form.cleaned_data["name"],
+                description=form.cleaned_data["description"],
+                price=form.cleaned_data["price"],
+                stock=form.cleaned_data["stock"],
+                is_available=form.cleaned_data["is_available"],
+            )
+            product.save()
+        else:
+            print("Form is Invalid")
+            print(form.errors)
+    else:
+        form = ProductForm()
+     
     context = {"form": form}
-    return render(request, "products/product_create.html", context)
+    return render(request, "products/product_Form.html", context)
