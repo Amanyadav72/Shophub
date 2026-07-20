@@ -1,9 +1,22 @@
 from django import forms
 from .models import Product
 
-class ProductForm(forms.Form):
-    name = forms.CharField(max_length=100)
-    description = forms.CharField()
-    price = forms.DecimalField()
-    stock = forms.IntegerField()
-    is_available = forms.BooleanField(required=False)
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ["name", "description", "price", "stock", "is_available"]
+    
+        widgets = {
+        "description": forms.Textarea(
+            attrs={
+                "rows": 4,
+                "placeholder": "Add Product Description"
+                  }
+                ),
+            }
+   
+    def clean_stock(self):
+        stock = self.cleaned_data["stock"]
+        if stock < 0:
+            raise forms.ValidationError("Stock cannot be negative.")
+        return stock

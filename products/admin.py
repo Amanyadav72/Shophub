@@ -4,7 +4,7 @@ from .models import Product
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "stock"]
+    list_display = ["name", "price", "stock", "is_available", "created_at", "updated_at"]
     search_fields = ["name", "description"]
     list_filter = ["is_available"]
     ordering = ["-created_at"]
