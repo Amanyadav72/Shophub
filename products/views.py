@@ -28,13 +28,19 @@ def product_form(request):
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
-    if request.method == 'Post':
-        form = ProductForm(request.Post, instance=product)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+
+        print("POST received")
+        print("FORM VALID:", form.is_valid())
+        print("FORM ERRORS:", form.errors)
 
         if form.is_valid():
             form.save()
-            return redirect('home')
+            print("PRODUCT UPDATED")
+            return redirect("home")
+
     else:
         form = ProductForm(instance=product)
-    
-    return render(request, "products/product_form.html", {"form":form})
+
+    return render(request, "products/product_form.html", {"form": form})
