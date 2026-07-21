@@ -10,9 +10,9 @@
     {% for item in products %}
         <p>{{ item.name }} </p>
         <p>Price: Rs.{{ item.price }} </p>
-        <a href="{% url 'edit_product' item.pk %}">
+        <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
         Edit
-        </a>
+        </a></button>
         <hr>
     {% endfor %}
 
