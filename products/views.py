@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Product
-from .forms import ProductForm
+from .forms import ProductForm, RegisterForm
 
 
 def home(request):
@@ -44,3 +44,20 @@ def edit_product(request, pk):
         form = ProductForm(instance=product)
 
     return render(request, "products/product_form.html", {"form": form})
+
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            print("Valid user Form")
+            form.save()
+            return redirect("home")
+        else:
+            print("Invalid user Form")
+    
+    else:
+        form = RegisterForm()
+
+    return render(request, "products/register.html", {"form" : form})
+

@@ -1,5 +1,10 @@
 from django import forms
 from .models import Product
+from django.contrib.auth.forms import UserCreationForm
+
+class RegisterForm(UserCreationForm):
+    pass
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
