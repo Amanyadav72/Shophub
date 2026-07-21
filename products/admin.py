@@ -9,5 +9,3 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ["is_available"]
     ordering = ["-created_at"]
     readonly_fields = ["created_at", "updated_at","id"]
-
-
