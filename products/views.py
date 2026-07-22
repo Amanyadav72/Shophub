@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .models import Product
 from .forms import ProductForm, RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 
 
 def home(request):
@@ -78,3 +78,7 @@ def user_login(request):
     else:
         form = AuthenticationForm()
     return render(request, "products/login.html", {"form" : form})
+
+def user_logut(request):
+    logout(request)
+    return redirect("home")
