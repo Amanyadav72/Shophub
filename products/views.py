@@ -81,4 +81,5 @@ def user_login(request):
 
 def user_logout(request):
     logout(request)
+    print("Loged out")
     return redirect("home")
