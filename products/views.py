@@ -4,6 +4,7 @@ from .models import Product
 from .forms import ProductForm, RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
@@ -12,6 +13,7 @@ def home(request):
     print(request.user.is_authenticated)
     return render(request, "products/home.html", {"products": product})
 
+@login_required
 def product_form(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
@@ -29,6 +31,7 @@ def product_form(request):
     context = {"form": form}
     return render(request, "products/product_Form.html", context)
 
+@login_required
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
@@ -72,7 +75,13 @@ def user_login(request):
             print("Valid user")
             user = form.get_user()
             login(request, user)
-            return redirect("home")
+            next_url = request.GET.get("next")
+            #loger version for next url
+            '''if next_url:
+                return redirect(next_url)
+            return redirect("home")'''
+            return redirect(next_url or "home")
+            
         else:
             print(form.errors)
     else:
