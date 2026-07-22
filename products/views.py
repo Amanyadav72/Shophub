@@ -67,9 +67,12 @@ def user_login(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
+            print("Valid user")
             user = form.get_user()
             login(request, user)
             return redirect("home")
+        else:
+            print(form.errors)
     else:
         form = AuthenticationForm()
     return render(request, "products/login.html", {"form" : form})
