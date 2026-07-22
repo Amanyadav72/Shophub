@@ -79,6 +79,6 @@ def user_login(request):
         form = AuthenticationForm()
     return render(request, "products/login.html", {"form" : form})
 
-def user_logut(request):
+def user_logout(request):
     logout(request)
     return redirect("home")
