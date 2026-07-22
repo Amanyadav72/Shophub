@@ -8,6 +8,8 @@ from django.contrib.auth import login
 
 def home(request):
     product = Product.objects.all()
+    print(request.user)
+    print(request.user.is_authenticated)
     return render(request, "products/home.html", {"products": product})
 
 def product_form(request):
