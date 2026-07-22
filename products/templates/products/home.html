@@ -7,14 +7,13 @@
     <h1>Welcome to ShopHub</h1>
     <p>This is our e-commerce website.</p>
     {% if user.is_authenticated%}
-       <h3>Welcome {{user.username}}</h3>
-       <button ><a href="{% url 'logout' %}" > logout</a></button>
+       <h3>Welcome {{user.username}} <button style="margin-left: 15px;"><a href="{% url 'logout' %}" > Logout</a></button></h3>
     {%else%}
-       <h3>Please Login</h3>
-       <button ><a href="{% url 'login' %}">login</a></button>
+       <h3>Please Login <button style="margin-left: 45px;"><a href="{% url 'login' %}" > Login</a></button></h3>
     {%endif%}
+    <hr>
     
-    <h2>Products</h2><hr>
+    <h2>Products  <button style="margin-left: 50px;">Add Product</button></h2><hr>
     {% for item in products %}
         <p>{{ item.name }} </p>
         <p>Price: Rs.{{ item.price }} </p>
