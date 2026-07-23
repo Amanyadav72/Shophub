@@ -13,13 +13,20 @@
     {%endif%}
     <hr>
     
-    <h2>Products  <button style="margin-left: 54px;"><a href="{% url 'product_form' %}" target="_blank"> Add Product</a></button></h2><hr>
+    <h2>
+        Products
+        {% if perms.products.add_product %}
+            <button style="margin-left: 54px;"><a href="{% url 'product_form' %}" target="_blank"> Add Product</a></button>
+        {% endif %}
+    </h2><hr>
     {% for item in products %}
         <p>{{item.id}}. {{ item.name }} </p>
         <p>Price: Rs.{{ item.price }} </p>
-        <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
-        Edit
-        </a></button>
+        {% if perms.products.change_product %}
+            <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
+            Edit
+            </a></button>
+        {% endif %}
     {% endfor %}
 
 </body>
