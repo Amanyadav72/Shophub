@@ -15,7 +15,7 @@
     
     <h2>Products  <button style="margin-left: 54px;"><a href="{% url 'product_form' %}"> Add Product</a></button></h2><hr>
     {% for item in products %}
-        <p>{{ item.name }} </p>
+        <p>{{item.id}}. {{ item.name }} </p>
         <p>Price: Rs.{{ item.price }} </p>
         <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
         Edit
