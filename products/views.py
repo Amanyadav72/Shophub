@@ -20,7 +20,9 @@ def product_form(request):
         form = ProductForm(request.POST)
         if form.is_valid():
             print("Form is Valid")
-            form.save()
+            product = form.save(commit=False)
+            product.owner = request.user
+            product.save()
             print("Product saved successfully")
             return redirect("product_form")
         else:
@@ -35,7 +37,7 @@ def product_form(request):
 @login_required
 @permission_required("products.change_product", raise_exception=True)
 def edit_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    product = get_object_or_404(Product, pk=pk, owner=request.user,)
 
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)

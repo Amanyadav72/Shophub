@@ -22,7 +22,7 @@
     {% for item in products %}
         <p>{{item.id}}. {{ item.name }} </p>
         <p>Price: Rs.{{ item.price }} </p>
-        {% if perms.products.change_product %}
+        {% if perms.products.change_product and item.owner == user %}
             <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
             Edit
             </a></button>
