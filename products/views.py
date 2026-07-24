@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Product
 from .forms import ProductForm, RegisterForm
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, permission_required
 
 
@@ -94,3 +94,15 @@ def user_logout(request):
     logout(request)
     print("Loged out")
     return redirect("home")
+
+@login_required
+def chang_password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.post)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect("home")
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, "products/change_password.html", {"form":form})
