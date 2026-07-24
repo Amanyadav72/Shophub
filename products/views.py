@@ -98,10 +98,11 @@ def user_logout(request):
 @login_required
 def change_password(request):
     if request.method == "POST":
-        form = PasswordChangeForm(request.user, request.post)
+        form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
+            print("password Updated Sucessfully")
             return redirect("home")
     else:
         form = PasswordChangeForm(request.user)
