@@ -1,3 +1,9 @@
+on:
+  push:
+    branches: [ ]  # Empty - won't run on push
+  pull_request:
+    branches: [ ]  # Empty - won't run on PR
+
 name: Django CI
 
 on:
