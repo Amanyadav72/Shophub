@@ -96,7 +96,7 @@ def user_logout(request):
     return redirect("home")
 
 @login_required
-def chang_password(request):
+def change_password(request):
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.post)
         if form.is_valid():
