@@ -5,6 +5,8 @@ from .forms import ProductForm, RegisterForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, permission_required
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 
 def home(request):
@@ -92,6 +94,8 @@ def user_login(request):
         form = AuthenticationForm()
     return render(request, "products/login.html", {"form" : form})
 
+@login_required
+@require_POST
 def user_logout(request):
     logout(request)
     print("Loged out")
