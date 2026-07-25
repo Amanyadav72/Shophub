@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
 from .models import Product
 from .forms import ProductForm, RegisterForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
@@ -11,8 +10,6 @@ from django.views.decorators.http import require_POST
 
 def home(request):
     product = Product.objects.all()
-    print(request.user)
-    print(request.user.is_authenticated)
     return render(request, "products/home.html", {"products": product})
 
 @login_required
@@ -21,15 +18,10 @@ def product_form(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
-            print("Form is Valid")
             product = form.save(commit=False)
             product.owner = request.user
             product.save()
-            print("Product saved successfully")
             return redirect("product_form")
-        else:
-            print("Form is Invalid")
-            print(form.errors)
     else:
         form = ProductForm()
      
@@ -44,13 +36,8 @@ def edit_product(request, pk):
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
 
-        print("POST received")
-        print("FORM VALID:", form.is_valid())
-        print("FORM ERRORS:", form.errors)
-
         if form.is_valid():
             form.save()
-            print("PRODUCT UPDATED")
             return redirect("home")
 
     else:
@@ -63,11 +50,8 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            print("Valid user Form")
             form.save()
             return redirect("home")
-        else:
-            print("Invalid user Form")
     
     else:
         form = RegisterForm()
@@ -75,30 +59,32 @@ def register(request):
     return render(request, "products/register.html", {"form" : form})
 
 def user_login(request):
+    next_url = request.POST.get("next") or request.GET.get("next")
+
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
+
         if form.is_valid():
-            print("Valid user")
             user = form.get_user()
             login(request, user)
-            next_url = request.GET.get("next")
-            #longer version for next url
-            '''if next_url:
+
+            if next_url and url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
                 return redirect(next_url)
-            return redirect("home")'''
-            return redirect(next_url or "home")
-            
-        else:
-            print(form.errors)
+
+            return redirect("home")
     else:
         form = AuthenticationForm()
-    return render(request, "products/login.html", {"form" : form})
+
+    return render(request, "products/login.html", {"form": form, "next": next_url})
 
 @login_required
 @require_POST
 def user_logout(request):
     logout(request)
-    print("Loged out")
     return redirect("home")
 
 @login_required
@@ -108,7 +94,6 @@ def change_password(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
-            print("password Updated Sucessfully")
             return redirect("home")
     else:
         form = PasswordChangeForm(request.user)
