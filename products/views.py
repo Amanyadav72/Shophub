@@ -37,7 +37,7 @@ def product_form(request):
 @login_required
 @permission_required("products.change_product", raise_exception=True)
 def edit_product(request, pk):
-    product = get_object_or_404(Product, pk=pk, owner=request.user,)
+    product = get_object_or_404(Product, pk=pk, owner=request.user)
 
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
@@ -80,7 +80,7 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
             next_url = request.GET.get("next")
-            #loger version for next url
+            #longer version for next url
             '''if next_url:
                 return redirect(next_url)
             return redirect("home")'''
