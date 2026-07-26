@@ -28,7 +28,12 @@
     </h2><hr>
     {% for item in products %}
         <p>{{item.id}}. {{ item.name }} </p>
-        <p>category: {{ item.categories}}
+        <p>Category:</p>
+        <ul>
+        {% for c in item.categories.all %}
+           <p>-{{c.name}}</p>
+        {% endfor %}
+        </ul>
         <p>Price: Rs.{{ item.price }} </p>
         {% if perms.products.change_product and item.owner == user %}
             <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
