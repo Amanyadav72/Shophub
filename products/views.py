@@ -21,6 +21,7 @@ def product_form(request):
             product = form.save(commit=False)
             product.owner = request.user
             product.save()
+            form.save_m2m()
             return redirect("product_form")
     else:
         form = ProductForm()
