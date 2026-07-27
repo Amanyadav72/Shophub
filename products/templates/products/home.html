@@ -28,7 +28,12 @@
         {% endif %}
     </h2><hr>
     {% for item in products %}
-        <p>{{item.id}}. {{ item.name }} </p>
+        <p>{{item.id}}. 
+            {% if item.image %}
+             <img src="{{item.image.url}}" alt="{{item.name}}" width="200" title="iPhone">
+            {% endif %}
+        </p>
+        <p>{{ item.name }} </p>
         <p>Category:</p>
         <ul>
         {% for c in item.categories.all %}
