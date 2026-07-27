@@ -32,7 +32,7 @@ class Product(models.Model):
         return self.name
 
 class SellerProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     phone = models.CharField(max_length=15)
     address = models.TextField()
     bio = models.TextField(blank=True)

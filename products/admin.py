@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Category
+from .models import Product, Category, SellerProfile
 # Register your models here.
 
 @admin.register(Category)
@@ -15,3 +15,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ["is_available"]
     ordering = ["-created_at"]
     readonly_fields = ["created_at", "updated_at","id"]
+
+@admin.register(SellerProfile)
+class SellerProfileAdmin(admin.ModelAdmin):
+    list_display = ["id","user","phone"]
+    search_fields = ["user__username", "phone"]
