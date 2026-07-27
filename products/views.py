@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 
 def home(request):
-    product = Product.objects.all()
+    product = Product.objects.select_related("owner").prefetch_related("categories")
     return render(request, "products/home.html", {"products": product})
 
 @login_required
