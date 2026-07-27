@@ -9,7 +9,7 @@ class RegisterForm(UserCreationForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "description", "price", "stock", "categories","is_available","status"]
+        fields = ["name", "image","description", "price", "stock", "categories","is_available","status"]
     
         widgets = {
         "description": forms.Textarea(
