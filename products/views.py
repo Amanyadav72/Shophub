@@ -38,7 +38,9 @@ def edit_product(request, pk):
         form = ProductForm(request.POST, instance=product)
 
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            product.save()
+            form.save_m2m()
             return redirect("home")
 
     else:

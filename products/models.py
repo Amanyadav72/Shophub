@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -10,6 +11,10 @@ class Category(models.Model):
         return self.name 
 
 class Product(models.Model):
+    class Status(models.TextChoices):
+       DRAFT = "DR", "Draft"
+       PUBLISHED = "PB", "Published"
+       OUT_OF_STOCK = "OS", "Out of Stock"
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -20,7 +25,19 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    status = models.CharField(
+        max_length=2,
+        choices=Status,
+        default=Status.DRAFT,
+    )
     stock = models.IntegerField(default=0)
+    def clean(self):
+        if self.stock == 0 and self.status == self.Status.PUBLISHED:
+            raise ValidationError(
+                {"status": "Out of stock products cannot be published."}
+            )
+
     is_available = models.BooleanField(default=True)
 
     categories = models.ManyToManyField(Category, blank=True)
