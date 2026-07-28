@@ -17,6 +17,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name 
 
+
 class Product(TimeStampModel):
     class Status(models.TextChoices):
        DRAFT = "DR", "Draft"
@@ -46,11 +47,23 @@ class Product(TimeStampModel):
             raise ValidationError(
                 {"status": "Out of stock products cannot be published."}
             )
+        existing_product = Product.objects.filter(
+            owner=self.owner,
+            name=self.name,
+        ).exclude(pk=self.pk)
+        if existing_product.exists():
+            raise ValidationError({
+                "name": "You already have a product with this name."
+        })
 
     is_available = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, blank=True)
     class Meta:
         ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(
+            fields=["owner","name"],
+            name="unique_product_per_owner",
+        )]
     
     def __str__(self):
         return self.name

@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
 
 
 def home(request):
@@ -20,6 +21,7 @@ def product_form(request):
         if form.is_valid():
             product = form.save(commit=False)
             product.owner = request.user
+            product.full_clean()
             product.save()
             form.save_m2m()
             return redirect("product_form")
@@ -39,6 +41,7 @@ def edit_product(request, pk):
 
         if form.is_valid():
             product = form.save(commit=False)
+            product.full_clean()
             product.save()
             form.save_m2m()
             return redirect("home")
