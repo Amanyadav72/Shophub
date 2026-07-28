@@ -10,7 +10,6 @@ class TimeStampModel(models.Model):
         abstract = True
     
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
