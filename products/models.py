@@ -3,6 +3,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 # Create your models here.
+class TimeStampModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        abstract = True
+    
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -10,7 +17,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name 
 
-class Product(models.Model):
+class Product(TimeStampModel):
     class Status(models.TextChoices):
        DRAFT = "DR", "Draft"
        PUBLISHED = "PB", "Published"
@@ -41,14 +48,13 @@ class Product(models.Model):
             )
 
     is_available = models.BooleanField(default=True)
-
     categories = models.ManyToManyField(Category, blank=True)
+    class Meta:
+        ordering = ["-created_at"]
     
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return self.name
+
 
 class SellerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
@@ -58,4 +64,25 @@ class SellerProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
-    
+
+
+#learning Purpose
+#Thuough Model Only need when categories will have extra atribute after that django wont 
+# abl to automaticaly do join table
+"""class ProductCategory(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+    )
+
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+    )
+
+    is_primary = models.BooleanField(default=False)
+
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.name} -> {self.category.name}"""
