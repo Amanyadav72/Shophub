@@ -21,7 +21,14 @@ def product_form(request):
         if form.is_valid():
             product = form.save(commit=False)
             product.owner = request.user
-            product.full_clean()
+            try:
+                product.full_clean()
+            except ValidationError as exc:
+                for field, errors in exc.message_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
+                return render(request, "products/product_Form.html", {"form":form})
+ 
             product.save()
             form.save_m2m()
             return redirect("product_form")
@@ -41,14 +48,19 @@ def edit_product(request, pk):
 
         if form.is_valid():
             product = form.save(commit=False)
-            product.full_clean()
+            try:
+                product.full_clean()
+            except ValidationError as exc:
+                for field, errors in exc.message_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
+                return render(request, "products/product_Form.html", {"form":form})
+             
             product.save()
             form.save_m2m()
-            return redirect("home")
-
+            return redirect("product_form")            
     else:
         form = ProductForm(instance=product)
-
     return render(request, "products/product_form.html", {"form": form})
 
 def register(request):

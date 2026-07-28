@@ -43,14 +43,15 @@ class Product(TimeStampModel):
     )
     stock = models.IntegerField(default=0)
     def clean(self):
+        existing_product = Product.objects.filter(
+                    owner=self.owner,
+                    name=self.name,
+                ).exclude(pk=self.pk)
         if self.stock == 0 and self.status == self.Status.PUBLISHED:
             raise ValidationError(
                 {"status": "Out of stock products cannot be published."}
             )
-        existing_product = Product.objects.filter(
-            owner=self.owner,
-            name=self.name,
-        ).exclude(pk=self.pk)
+        
         if existing_product.exists():
             raise ValidationError({
                 "name": "You already have a product with this name."
