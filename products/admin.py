@@ -10,7 +10,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["id","name", "price", "stock", "is_available", "created_at", "updated_at"]
+    list_display = ["id","name","owner", "stock", "is_available", "created_at", "updated_at","price"]
     search_fields = ["name", "description"]
     list_filter = ["is_available","status"]
     ordering = ["-created_at"]

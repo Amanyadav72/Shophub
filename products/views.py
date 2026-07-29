@@ -7,7 +7,30 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
+from django.views.generic import ListView
 
+class ProductListView(ListView):
+    model = Product
+    template_name = "products/home.html"
+    context_object_name = "products"
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # 1. Anonymous users or logged-in non-staff customers see published items
+        if not user.is_authenticated:
+            return Product.objects.published().select_related("owner").prefetch_related("categories")
+
+        # 2. Superuser / Admin: See ALL products across all sellers
+        if user.is_superuser:
+            return Product.objects.all().select_related("owner").prefetch_related("categories")
+
+        # 3. Sellers: See all products THEY created (published, draft, out of stock)
+        if user.has_perm("products.add_product"):
+            return Product.objects.by_owner(user).prefetch_related("categories")
+
+        # 4. Regular logged-in Customer: See published items
+        return Product.objects.published().select_related("owner").prefetch_related("categories")
 
 def home(request):
     product = Product.objects.published().select_related("owner").prefetch_related("categories")
