@@ -13,6 +13,10 @@ class TimeStampModel(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
     def __str__(self):
         return self.name 
 
@@ -59,11 +63,17 @@ class Product(TimeStampModel):
     is_available = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, blank=True)
     class Meta:
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
         ordering = ["-created_at"]
         constraints = [models.UniqueConstraint(
             fields=["owner","name"],
             name="unique_product_per_owner",
         )]
+        indexes = [
+            models.Index(fields=["status", "is_available"]),
+            models.Index(fields=["name"]),
+        ]
     
     def __str__(self):
         return self.name
