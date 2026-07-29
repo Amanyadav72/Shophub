@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 
 def home(request):
-    product = Product.objects.select_related("owner").prefetch_related("categories")
+    product = Product.objects.published().select_related("owner").prefetch_related("categories")
     return render(request, "products/home.html", {"products": product})
 
 @login_required
