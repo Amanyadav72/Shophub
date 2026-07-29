@@ -20,6 +20,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name 
 
+class ProductQuerySet(models.QuerySet):
+    def published(self):
+        """Returns only published and available products."""
+        return self.filter(status="PB", is_available=True)
+    def by_owner(self,user):
+        """Returns products owned by a specific user."""
+        return self.filter(owner=user)
+
 
 class Product(TimeStampModel):
     class Status(models.TextChoices):
@@ -62,6 +70,9 @@ class Product(TimeStampModel):
 
     is_available = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, blank=True)
+
+    objects = ProductQuerySet.as_manager()
+    
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
