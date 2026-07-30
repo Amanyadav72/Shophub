@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 
 class ProductListView(ListView):
     model = Product
@@ -31,6 +31,14 @@ class ProductListView(ListView):
 
         # 4. Regular logged-in Customer: See published items
         return Product.objects.published().select_related("owner").prefetch_related("categories")
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = "products.product_detail.html"
+    context_object_name = "product"
+    
+
 
 def home(request):
     product = Product.objects.published().select_related("owner").prefetch_related("categories")
