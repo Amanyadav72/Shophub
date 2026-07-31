@@ -47,7 +47,7 @@
         <p>Price: Rs.{{ item.price }} </p>
         <a href="{% url 'product_detail' item.pk %}" target="_blank">Details</a>        
         {% if perms.products.change_product and item.owner == user %}
-            <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
+            <button ><a href="{% url 'edit_product' item.pk %}" >
             Edit
             </a></button>
         {% endif %}
