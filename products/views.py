@@ -7,7 +7,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
+from django.urls import reverse_lazy
 
 class ProductListView(ListView):
     model = Product
@@ -32,6 +33,11 @@ class ProductListView(ListView):
         # 4. Regular logged-in Customer: See published items
         return Product.objects.published().select_related("owner").prefetch_related("categories")
 
+'''
+def home(request):
+    product = Product.objects.published().select_related("owner").prefetch_related("categories")
+    return render(request, "products/home.html", {"products": product})
+'''
 
 class ProductDetailView(DetailView):
     model = Product
@@ -39,9 +45,23 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
 
 
-def home(request):
-    product = Product.objects.published().select_related("owner").prefetch_related("categories")
-    return render(request, "products/home.html", {"products": product})
+class ProductCreateView(CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = "products/product_from.html"
+    success_url = reverse_lazy("product_form")    # Redirects back to the empty form as you requested
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+
+        try:
+            form.instance.full_clean()
+        except ValidationError as exc:
+            for feild, errors in exc.message_dict.items():
+                for error in errors:
+                    form.add_error(feild, error)
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
 
 @login_required
 @permission_required("products.add_product", raise_exception=True)
