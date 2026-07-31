@@ -48,7 +48,7 @@ class ProductDetailView(DetailView):
 class ProductCreateView(CreateView):
     model = Product
     form_class = ProductForm
-    template_name = "products/product_from.html"
+    template_name = "products/product_Form.html"
     success_url = reverse_lazy("product_form")    # Redirects back to the empty form as you requested
     def form_valid(self, form):
         form.instance.owner = self.request.user
