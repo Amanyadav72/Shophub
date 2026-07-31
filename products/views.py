@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
-
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
@@ -45,7 +45,7 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin,CreateView):
     model = Product
     form_class = ProductForm
     template_name = "products/product_Form.html"
@@ -62,7 +62,7 @@ class ProductCreateView(CreateView):
             return self.form_invalid(form)
         return super().form_valid(form)
 
-
+'''
 @login_required
 @permission_required("products.add_product", raise_exception=True)
 def product_form(request):
@@ -87,6 +87,7 @@ def product_form(request):
      
     context = {"form": form}
     return render(request, "products/product_Form.html", context)
+'''
 
 @login_required
 @permission_required("products.change_product", raise_exception=True)
