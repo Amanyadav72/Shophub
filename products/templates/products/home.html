@@ -6,19 +6,23 @@
 <body>
     <h1>Welcome to ShopHub</h1>
     <p>This is our e-commerce website.</p>
-    {% if user.is_authenticated%}
-       <h3>Welcome {{user.username}} <button style="margin-left: 1px;"><a href="{% url 'change_password' %}" >Change Password</a></button>
-         <form method="post" action="{% url 'logout'%}" style="display: inline;"> <br>
+    {% if user.is_authenticated %}
+      <h3>Welcome {{ user.username }}</h3>
+
+      <a href="{% url 'change_password' %}">Change Password</a>
+
+      <form method="post" action="{% url 'logout' %}" style="display: inline;">
          {% csrf_token %}
-         <button type="submit"  style="margin-left: 128px;"> Logout </button>
-         </form>
-       </h3>
-    {%else%}
-       <h3>Please Login <button style="margin-left: 43px;"><a href="{% url 'login' %}" > Login</a></button>
-           <button style="margin-left: 0px;"><a href="{% url 'register' %}" >Register</a></button>
-        <br><br>Forgot Password ?<button style="margin-left: 1px;"><a href="{% url 'password_reset' %}" >Reset Password</a></button>
-       </h3>
-    {%endif%}
+         <button type="submit" class="btn btn-danger">Logout</button>
+      </form>
+
+    {% else %}
+      <h3>Please Login</h3>
+
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'register' %}">Register</a>
+      <a href="{% url 'password_reset' %}">Reset Password</a>
+    {% endif %}
     <hr>
     
     <h2>
@@ -41,6 +45,7 @@
         {% endfor %}
         </ul>
         <p>Price: Rs.{{ item.price }} </p>
+        <a href="{% url 'product_detail' item.pk %}" target="_blank">Details</a>        
         {% if perms.products.change_product and item.owner == user %}
             <button ><a href="{% url 'edit_product' item.pk %}" target="_blank">
             Edit
