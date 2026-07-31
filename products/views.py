@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
 
@@ -94,7 +94,7 @@ def product_form(request):
     return render(request, "products/product_Form.html", context)
 '''
 
-class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
     form_class = ProductForm
     template_name = "products/product_Form.html"
@@ -108,8 +108,6 @@ class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
         return product.owner == self.request.user
 
     def form_valid(self, form):
-            #form.instance.owner = self.request.user
-    
             try:
                 form.instance.full_clean()
             except ValidationError as exc:
@@ -119,7 +117,7 @@ class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
                 return self.form_invalid(form)
             return super().form_valid(form)
 
-
+'''
 @login_required
 @permission_required("products.change_product", raise_exception=True)
 def edit_product(request, pk):
@@ -144,7 +142,20 @@ def edit_product(request, pk):
     else:
         form = ProductForm(instance=product)
     return render(request, "products/product_form.html", {"form": form})
+'''
 
+class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Product
+    template_name = "products/product_confirm_delete.html"
+    success_url = reverse_lazy("home")
+    permission_required = "products.delete_product"
+
+    def test_func(self):
+        # Exact same object-level security as UpdateView!
+        product = self.get_object()
+        return product.owner == self.request.user
+    
+    
 def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
