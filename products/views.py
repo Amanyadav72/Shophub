@@ -7,9 +7,10 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
+
 class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
@@ -50,7 +51,10 @@ class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin,CreateView):
     form_class = ProductForm
     template_name = "products/product_Form.html"
     success_url = reverse_lazy("product_form")    # Redirects back to the empty form as you requested
+    permission_required = "products.add_product"  # This replaces the @permission_required decorator
+
     def form_valid(self, form):
+        # 1. Attach the logged-in user to the product
         form.instance.owner = self.request.user
 
         try:
@@ -59,7 +63,8 @@ class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin,CreateView):
             for feild, errors in exc.message_dict.items():
                 for error in errors:
                     form.add_error(feild, error)
-            return self.form_invalid(form)
+            return self.form_invalid(form) # 2. Run your custom model validations (like the out-of-stock check)
+        # 3. Save to database
         return super().form_valid(form)
 
 '''
@@ -88,6 +93,32 @@ def product_form(request):
     context = {"form": form}
     return render(request, "products/product_Form.html", context)
 '''
+
+class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = "products/product_Form.html"
+    success_url = reverse_lazy("home")
+    permission_required = "products.change_product"
+
+    def test_func(self):
+        # self.get_object() fetches the product we are trying to edit
+        product = self.get_object()
+        # Return True only if the logged-in user is the owner
+        return product.owner == self.request.user
+
+    def form_valid(self, form):
+            #form.instance.owner = self.request.user
+    
+            try:
+                form.instance.full_clean()
+            except ValidationError as exc:
+                for feild, errors in exc.message_dict.items():
+                    for error in errors:
+                        form.add_error(feild, error)
+                return self.form_invalid(form)
+            return super().form_valid(form)
+
 
 @login_required
 @permission_required("products.change_product", raise_exception=True)
