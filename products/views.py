@@ -15,25 +15,27 @@ class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
     context_object_name = "products"
-    paginate_by = 2
+    paginate_by = 4
 
     def get_queryset(self):
         user = self.request.user
 
-        # 1. Anonymous users or logged-in non-staff customers see published items
         if not user.is_authenticated:
-            return Product.objects.published().select_related("owner").prefetch_related("categories")
+            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
+        elif user.is_superuser:
+            qs = Product.objects.all().select_related("owner").prefetch_related("categories")
+        elif user.has_perm("products.add_product"):
+            qs = Product.objects.by_owner(user).prefetch_related("categories")
+        else:
+            qs = Product.objects.published().select_related("owner").prfetch_related("categories")
 
-        # 2. Superuser / Admin: See ALL products across all sellers
-        if user.is_superuser:
-            return Product.objects.all().select_related("owner").prefetch_related("categories")
+        search_query = self.request.GET.get('q')
+        if search_query:
+            qs = qs.filter(name__icontains=search_query)
 
-        # 3. Sellers: See all products THEY created (published, draft, out of stock)
-        if user.has_perm("products.add_product"):
-            return Product.objects.by_owner(user).prefetch_related("categories")
-
-        # 4. Regular logged-in Customer: See published items
-        return Product.objects.published().select_related("owner").prefetch_related("categories")
+        return qs
+    
+         
 
 '''
 def home(request):

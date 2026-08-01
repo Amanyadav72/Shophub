@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopHub</title>
 </head>
 <body>
@@ -31,6 +33,13 @@
             <button style="margin-left: 54px;"><a href="{% url 'product_form' %}" target="_blank"> Add Product</a></button>
         {% endif %}
     </h2><hr>
+    <!-- SEARCH FORM -->
+    <form method="GET" action="{% url 'home' %}" style="margin-bottom: 20px;">
+        <!-- We set the value to request.GET.q so the user's search term stays in the input box after the page reloads -->
+        <input type="text" name="q" placeholder="Search products by name..." value="{{ request.GET.q }}">
+        <button type="submit">Search</button>
+    </form>
+    <hr>
     {% for item in products %}
         <p>{{item.id}}. 
             {% if item.image %}
