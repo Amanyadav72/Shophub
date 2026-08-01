@@ -51,6 +51,27 @@
             <button><a href="{% url 'delete_product' item.pk %}">Delete</a></button>
         {% endif %}
     {% endfor %}
+    <hr>
+    <div class="pagination">
+      <span class="step-links">
+        <!-- If there is a previous page, show First and Previous buttons -->
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" >Prev..</a>
+        {% endif %}
+
+        <!-- Current page indicator -->
+        <span class="current" style="margin: 0 15px; font-weight: bold;">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        <!-- If there is a next page, show Next and Last buttons -->
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+     </span>
+    </div>
 
 </body>
 </html>
