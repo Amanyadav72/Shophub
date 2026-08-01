@@ -25,9 +25,9 @@ class ProductListView(ListView):
         elif user.is_superuser:
             qs = Product.objects.all().select_related("owner").prefetch_related("categories")
         elif user.has_perm("products.add_product"):
-            qs = Product.objects.by_owner(user).prefetch_related("categories")
+            qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
         else:
-            qs = Product.objects.published().select_related("owner").prfetch_related("categories")
+            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
         search_query = self.request.GET.get('q')
         if search_query:
