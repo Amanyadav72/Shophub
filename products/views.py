@@ -10,12 +10,13 @@ from django.core.exceptions import ValidationError
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 
 class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
     context_object_name = "products"
-    paginate_by = 4
+    paginate_by = 2
 
     def get_queryset(self):
         user = self.request.user
@@ -31,7 +32,9 @@ class ProductListView(ListView):
 
         search_query = self.request.GET.get('q')
         if search_query:
-            qs = qs.filter(name__icontains=search_query)
+            qs = qs.filter(
+                Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(categories__name__icontains=search_query)
+                ).distinct()
 
         return qs
     
