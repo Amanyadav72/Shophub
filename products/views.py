@@ -22,7 +22,7 @@ class ProductListView(ListView):
         user = self.request.user
 
         if not user.is_authenticated:
-            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
+            qs = Product.objects.published().prefetch_related("categories")
         elif user.is_superuser:
             qs = Product.objects.all().select_related("owner").prefetch_related("categories")
         elif user.has_perm("products.add_product"):
