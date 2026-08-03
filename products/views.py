@@ -32,12 +32,16 @@ class ProductListView(ListView):
 
         search_query = self.request.GET.get('q')
         category_filter = self.request.GET.get('category')
+        ordering = self.request.GET.get('ordering')
         if search_query:
             qs = qs.filter(
                 Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(categories__name__icontains=search_query)
                 ).distinct()
         if category_filter:
             qs =qs.filter(categories__name=category_filter)
+        if ordering:
+            if ordering in ['price','-price','-created_at']:
+                qs = qs.order_by(ordering)
 
         return qs
     
