@@ -85,8 +85,8 @@
       <span class="step-links">
         <!-- If there is a previous page, show First and Previous buttons -->
         {% if page_obj.has_previous %}
-            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page=1">&laquo; First</a>
-            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.previous_page_number }}" >Prev..</a>
+            <a href="?ordering={{request.GET.ordering}}&category={{ request.GET.category}}&q={{ request.GET.q}}&page=1">&laquo; First</a>
+            <a href="?ordering={{request.GET.ordering}}&category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.previous_page_number }}" >Prev..</a>
         {% endif %}
 
         <!-- Current page indicator -->
@@ -96,8 +96,8 @@
 
         <!-- If there is a next page, show Next and Last buttons -->
         {% if page_obj.has_next %}
-            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.next_page_number }}">Next</a>
-            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            <a href="?ordering={{request.GET.ordering}}&category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?ordering={{request.GET.ordering}}&category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
         {% endif %}
      </span>
     </div>

@@ -76,7 +76,7 @@ class Product(TimeStampModel):
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "Products"
-        ordering = ["-created_at"]
+        ordering = ["-updated_at"]
         constraints = [models.UniqueConstraint(
             fields=["owner","name"],
             name="unique_product_per_owner",
