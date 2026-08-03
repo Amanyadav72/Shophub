@@ -36,17 +36,29 @@
     <!-- SEARCH FORM -->
     <form method="GET" action="{% url 'home' %}" style="margin-bottom: 20px;">
         <!-- We set the value to request.GET.q so the user's search term stays in the input box after the page reloads -->
+        {% if request.GET.category %}
+         <input type="hidden" name="category" value="{{ request.GET.category }}">
+        {% endif %}
         <input type="text" name="q" placeholder="Search products by name..." value="{{ request.GET.q }}">
         <button type="submit">Search</button>
     </form>
+    <!-- Category Filters -->
     <div style="margin-bottom: 20px;">
     <strong>Filter by Category:</strong>
-      <a href="?category=Mobile Phones">Mobile Phones</a> | 
-      <a href="?category=Electronics">Electronics</a> |
-      <a href="?category=Laptops">Laptops</a> |
-      <a href="?category=TV">TV</a> |
+      <a href="?category=Mobile Phones&q={{ request.GET.q}}">Mobile Phones</a> | 
+      <a href="?category=Electronics&q={{ request.GET.q}}">Electronics</a> |
+      <a href="?category=Laptops&q={{ request.GET.q}}">Laptops</a> |
+      <a href="?category=TV&q={{ request.GET.q}}">TV</a> |
       <a href="{% url 'home' %}">Clear Filters</a>
     </div>
+    <!-- SORTING -->
+     <div style="margin-bottom: 20px;">
+            <strong>Sort By:</strong>
+            <a href="?ordering=price&q={{ request.GET.q }}&category={{ request.GET.category }}">Price: Low to High</a> |
+            <a href="?ordering=-price&q={{ request.GET.q }}&category={{ request.GET.category }}">Price: High to Low</a> |
+            <a href="?ordering=-created_at&q={{ request.GET.q }}&category={{ request.GET.category }}">Newest Arrivals</a>
+     </div>
+<hr>
     <hr>
     {% for item in products %}
         <p>{{item.id}}. 
