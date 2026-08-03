@@ -31,10 +31,13 @@ class ProductListView(ListView):
             qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
         search_query = self.request.GET.get('q')
+        category_filter = self.request.GET.get('category')
         if search_query:
             qs = qs.filter(
                 Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(categories__name__icontains=search_query)
                 ).distinct()
+        if category_filter:
+            qs =qs.filter(categories__name=category_filter)
 
         return qs
     
