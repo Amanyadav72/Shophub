@@ -39,6 +39,14 @@
         <input type="text" name="q" placeholder="Search products by name..." value="{{ request.GET.q }}">
         <button type="submit">Search</button>
     </form>
+    <div style="margin-bottom: 20px;">
+    <strong>Filter by Category:</strong>
+      <a href="?category=Mobile Phones">Mobile Phones</a> | 
+      <a href="?category=Electronics">Electronics</a> |
+      <a href="?category=Laptops">Laptops</a> |
+      <a href="?category=TV">TV</a> |
+      <a href="{% url 'home' %}">Clear Filters</a>
+    </div>
     <hr>
     {% for item in products %}
         <p>{{item.id}}. 
@@ -65,8 +73,8 @@
       <span class="step-links">
         <!-- If there is a previous page, show First and Previous buttons -->
         {% if page_obj.has_previous %}
-            <a href="?q={{ request.GET.q}}&page=1">&laquo; First</a>
-            <a href="?q={{ request.GET.q}}&page={{ page_obj.previous_page_number }}" >Prev..</a>
+            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page=1">&laquo; First</a>
+            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.previous_page_number }}" >Prev..</a>
         {% endif %}
 
         <!-- Current page indicator -->
@@ -76,8 +84,8 @@
 
         <!-- If there is a next page, show Next and Last buttons -->
         {% if page_obj.has_next %}
-            <a href="?q={{ request.GET.q}}&page={{ page_obj.next_page_number }}">Next</a>
-            <a href="?q={{ request.GET.q}}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?category={{ request.GET.category}}&q={{ request.GET.q}}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
         {% endif %}
      </span>
     </div>
