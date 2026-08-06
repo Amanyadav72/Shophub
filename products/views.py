@@ -16,7 +16,7 @@ class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
     context_object_name = "products"
-    paginate_by = 2
+    paginate_by = 4
 
     def get_queryset(self):
         user = self.request.user
