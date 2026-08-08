@@ -46,12 +46,12 @@ class ProductListView(ListView):
         return qs
     
          
-
 '''
 def home(request):
     product = Product.objects.published().select_related("owner").prefetch_related("categories")
     return render(request, "products/home.html", {"products": product})
 '''
+
 
 class ProductDetailView(DetailView):
     model = Product
@@ -107,6 +107,7 @@ def product_form(request):
     return render(request, "products/product_Form.html", context)
 '''
 
+
 class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
     form_class = ProductForm
@@ -156,6 +157,7 @@ def edit_product(request, pk):
         form = ProductForm(instance=product)
     return render(request, "products/product_form.html", {"form": form})
 '''
+
 
 class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Product
