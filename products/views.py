@@ -11,6 +11,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 class ProductListView(ListView):
     model = Product
@@ -45,7 +48,6 @@ class ProductListView(ListView):
 
         return qs
     
-         
 '''
 def home(request):
     product = Product.objects.published().select_related("owner").prefetch_related("categories")
@@ -224,3 +226,12 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
+
+@api_view(['GET'])
+def api_test_view(request):
+    data = {
+        "message": "Welcome to the ShopHub API!",
+        "version": "1.0",
+        "status": "active"
+    }
+    return Response(data)
