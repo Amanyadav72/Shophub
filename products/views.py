@@ -11,8 +11,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from .serializers import ProductSerializer
 
 
 class ProductListView(ListView):
@@ -227,11 +228,12 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
 
-@api_view(['GET'])
-def api_test_view(request):
-    data = {
-        "message": "Welcome to the ShopHub API!",
-        "version": "1.0",
-        "status": "active"
-    }
-    return Response(data)
+class ProductListAPIView(APIView):
+    def get(self, request):
+        # 1. Get the complex data (QuerySet) from the DB
+        products = Product.objects.all()
+        # 2. Pass the data to the serializer. 
+        # many=True tells DRF we are serializing a list, not a single object.
+        serializer = ProductSerializer(products, many=True)
+        # 3. Return the serialized data as JSON
+        return Response(serializer.data)
