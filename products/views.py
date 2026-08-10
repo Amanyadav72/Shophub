@@ -277,7 +277,6 @@ class ProductDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # DELETE
     def delete(self, request, pk):
         product = self.get_object(pk)
         product.delete()
