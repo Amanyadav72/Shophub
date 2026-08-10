@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMix
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from .serializers import ProductSerializer
 
 
@@ -231,9 +232,25 @@ def change_password(request):
 class ProductListAPIView(APIView):
     def get(self, request):
         # 1. Get the complex data (QuerySet) from the DB
-        products = Product.objects.all().select_related('owner').prefetch_related('categories')
+        products = Product.objects.all()
         # 2. Pass the data to the serializer. 
         # many=True tells DRF we are serializing a list, not a single object.
         serializer = ProductSerializer(products, many=True)
         # 3. Return the serialized data as JSON
         return Response(serializer.data)
+
+    def post(self, request):
+        # 1. Pass the incoming JSON data to the serializer
+        serializer = ProductSerializer(data=request.data)
+        
+        # 2. Validate the data
+        if serializer.is_valid():
+            # 3. Save to database. 
+            # We explicitly pass the owner here because we made it read_only in the serializer!
+            serializer.save(owner=request.user) 
+            
+            # 4. Return the created object and a 201 Created status
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        # 5. If validation fails, return the exact errors to the frontend
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
