@@ -231,7 +231,7 @@ def change_password(request):
 class ProductListAPIView(APIView):
     def get(self, request):
         # 1. Get the complex data (QuerySet) from the DB
-        products = Product.objects.all().prefetch_related('categories')
+        products = Product.objects.all().select_related('owner').prefetch_related('categories')
         # 2. Pass the data to the serializer. 
         # many=True tells DRF we are serializing a list, not a single object.
         serializer = ProductSerializer(products, many=True)
