@@ -254,3 +254,32 @@ class ProductListAPIView(APIView):
             
         # 5. If validation fails, return the exact errors to the frontend
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProductDetailAPIView(APIView):
+    # Helper method to get the object and handle 404s cleanly
+    def get_object(self, pk):
+        return get_object_or_404(Product, pk=pk)
+
+    # RETRIEVE (Single Product)
+    def get(self, request, pk):
+        product = self.get_object(pk)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+    # UPDATE (Full or Partial)
+    def put(self, request, pk):
+        product = self.get_object(pk)
+        # partial=True allows PATCH-like behavior (updating just one field like price)
+        serializer = ProductSerializer(product, data=request.data, partial=True) 
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # DELETE
+    def delete(self, request, pk):
+        product = self.get_object(pk)
+        product.delete()
+        # 204 No Content is the standard REST status for a successful deletion
+        return Response(status=status.HTTP_204_NO_CONTENT)
