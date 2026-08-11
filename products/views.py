@@ -229,6 +229,8 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
 
+#Django REST Framework API's
+
 class ProductListAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
