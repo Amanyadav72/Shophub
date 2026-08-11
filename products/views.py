@@ -238,30 +238,7 @@ class ProductListAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
-class ProductDetailAPIView(APIView):
-    # Helper method to get the object and handle 404s cleanly
-    def get_object(self, pk):
-        return get_object_or_404(Product, pk=pk)
-
-    # RETRIEVE (Single Product)
-    def get(self, request, pk):
-        product = self.get_object(pk)
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-
-    # UPDATE (Full or Partial)
-    def put(self, request, pk):
-        product = self.get_object(pk)
-        # partial=True allows PATCH-like behavior (updating just one field like price)
-        serializer = ProductSerializer(product, data=request.data, partial=True) 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        product = self.get_object(pk)
-        product.delete()
-        # 204 No Content is the standard REST status for a successful deletion
-        return Response(status=status.HTTP_204_NO_CONTENT)
+# 2. Combines GET (Retrieve), PUT/PATCH (Update), and DELETE (Destroy)
+class ProductDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
