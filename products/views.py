@@ -229,31 +229,14 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
 
-class ProductListAPIView(APIView):
-    def get(self, request):
-        # 1. Get the complex data (QuerySet) from the DB
-        products = Product.objects.all()
-        # 2. Pass the data to the serializer. 
-        # many=True tells DRF we are serializing a list, not a single object.
-        serializer = ProductSerializer(products, many=True)
-        # 3. Return the serialized data as JSON
-        return Response(serializer.data)
+class ProductListAPIView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-    def post(self, request):
-        # 1. Pass the incoming JSON data to the serializer
-        serializer = ProductSerializer(data=request.data)
-        
-        # 2. Validate the data
-        if serializer.is_valid():
-            # 3. Save to database. 
-            # We explicitly pass the owner here because we made it read_only in the serializer!
-            serializer.save(owner=request.user) 
-            
-            # 4. Return the created object and a 201 Created status
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-        # 5. If validation fails, return the exact errors to the frontend
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # We must override this to assign the owner automatically, 
+    # just like we did manually in the APIView post() method!
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class ProductDetailAPIView(APIView):
