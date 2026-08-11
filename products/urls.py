@@ -4,8 +4,8 @@ from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
-    path("api/product/", views.ProductListAPIView.as_view(), name="api-product-list"),
-    path('api/products/<int:pk>/', views.ProductDetailAPIView.as_view(), name='api-product-detail'),
+    path("api/products/", views.ProductListAPIView.as_view(), name="api-product-list"),
+    path('api/product/<int:pk>/', views.ProductDetailAPIView.as_view(), name='api-product-detail'),
     
     path("", views.ProductListView.as_view(), name="home"),
     path("product-form/", views.ProductCreateView.as_view(), name="product_form"),
