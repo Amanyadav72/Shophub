@@ -229,7 +229,7 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
 
-class ProductListAPIView(generics.CreateAPIView):
+class ProductListAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
