@@ -1,12 +1,15 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from django.contrib.auth import views as auth_views
+from rest_framework.routers import DefaultRouter
 
+router = DefaultRouter()
+#registered ProductViewSet with prefix ('products')
+router.register(r'products', views.ProductViewSet, basename='product')
 
 urlpatterns = [
-    path("api/products/", views.ProductListAPIView.as_view(), name="api-product-list"),
-    path('api/product/<int:pk>/', views.ProductDetailAPIView.as_view(), name='api-product-detail'),
-    
+    path("api/", include(router.urls)),
+
     path("", views.ProductListView.as_view(), name="home"),
     path("product-form/", views.ProductCreateView.as_view(), name="product_form"),
     path("product/<int:pk>/edit/", views.ProductUpdateView.as_view(), name="edit_product"),
