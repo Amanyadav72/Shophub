@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMix
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 from .serializers import ProductSerializer
 
 
@@ -231,16 +231,9 @@ def change_password(request):
 
 #Django REST Framework API's
 
-class ProductListAPIView(generics.ListCreateAPIView):
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-    # We must override this to assign the owner automatically, 
-    # just like we did manually in the APIView post() method!
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
-# 2. Combines GET (Retrieve), PUT/PATCH (Update), and DELETE (Destroy)
-class ProductDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+        return serializer.save(owner=self.request.user)
