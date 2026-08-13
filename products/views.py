@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics, viewsets
 from .serializers import ProductSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
+from .permissions import IsOwnerOrReadOnly
 
 class ProductListView(ListView):
     model = Product
@@ -235,7 +235,7 @@ def change_password(request):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
