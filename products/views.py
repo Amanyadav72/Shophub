@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMix
 from django.db.models import Q
 #from rest_framework.views import APIView
 #from rest_framework.response import Response
-from rest_framework import status, generics, viewsets
+from rest_framework import viewsets
 from .serializers import ProductSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrReadOnly
