@@ -233,9 +233,23 @@ def change_password(request):
 #Django REST Framework API's
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    #queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            qs = Product.objects.published().prefetch_related("categories")
+        elif user.is_superuser:
+            qs = Product.objects.all().select_related("owner").prefetch_related("categories")
+        elif user.has_perm("products.add_product"):
+            qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
+        else:
+            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
+
+        return qs   
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
