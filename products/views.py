@@ -11,8 +11,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
-from rest_framework.views import APIView
-from rest_framework.response import Response
+#from rest_framework.views import APIView
+#from rest_framework.response import Response
 from rest_framework import status, generics, viewsets
 from .serializers import ProductSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
