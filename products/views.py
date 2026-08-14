@@ -17,6 +17,9 @@ from rest_framework import viewsets
 from .serializers import ProductSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrReadOnly
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 class ProductListView(ListView):
     model = Product
@@ -236,6 +239,18 @@ class ProductViewSet(viewsets.ModelViewSet):
     #queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    # 1. Register the Filter Backends
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    
+    # 2. Exact Filtering (Updated to match your model's field name)
+    filterset_fields = ['categories'] 
+    
+    # 3. Text Searching (Updated to span the categories relationship)
+    search_fields = ['name', 'description', 'categories__name'] 
+    
+    # 4. Sorting
+    ordering_fields = ['price', 'created_at']
 
     def get_queryset(self):
         user = self.request.user
