@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
+from .filters import ProductFilter
 
 class ProductListView(ListView):
     model = Product
@@ -244,7 +244,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     
     # 2. Exact Filtering (Updated to match your model's field name)
-    filterset_fields = ['categories'] 
+    #filterset_fields = ['categories']
+    filterset_class = ProductFilter
     
     # 3. Text Searching (Updated to span the categories relationship)
     search_fields = ['name', 'description', 'categories__name'] 
