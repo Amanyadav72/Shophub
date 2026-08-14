@@ -20,6 +20,7 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter
+from .pagination import ShopHubPagination
 
 class ProductListView(ListView):
     model = Product
@@ -240,6 +241,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
+    pagination_class = ShopHubPagination
     # 1. Register the Filter Backends
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     
