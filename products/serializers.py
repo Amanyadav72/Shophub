@@ -18,6 +18,14 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['owner', 'created_at']
 
+    def validate_image(self, value):
+        if value:
+            # value.size returns the file size in bytes
+            max_size = 2 * 1024 * 1024  # 2 Megabytes
+            if value.size > max_size:
+                raise serializers.ValidationError("Image size cannot exceed 2MB.")
+        return value
+
     def validate(self, data):
         # Safely get the incoming data
         stock = data.get('stock', self.instance.stock if self.instance else 0)
