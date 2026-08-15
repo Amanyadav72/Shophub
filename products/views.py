@@ -55,12 +55,6 @@ class ProductListView(ListView):
 
         return qs
     
-'''
-def home(request):
-    product = Product.objects.published().select_related("owner").prefetch_related("categories")
-    return render(request, "products/home.html", {"products": product})
-'''
-
 
 class ProductDetailView(DetailView):
     model = Product
@@ -89,33 +83,6 @@ class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin,CreateView):
         # 3. Save to database
         return super().form_valid(form)
 
-'''
-@login_required
-@permission_required("products.add_product", raise_exception=True)
-def product_form(request):
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.owner = request.user
-            try:
-                product.full_clean()
-            except ValidationError as exc:
-                for field, errors in exc.message_dict.items():
-                    for error in errors:
-                        form.add_error(field, error)
-                return render(request, "products/product_Form.html", {"form":form})
- 
-            product.save()
-            form.save_m2m()
-            return redirect("product_form")
-    else:
-        form = ProductForm()
-     
-    context = {"form": form}
-    return render(request, "products/product_Form.html", context)
-'''
-
 
 class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
@@ -139,33 +106,6 @@ class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesT
                         form.add_error(feild, error)
                 return self.form_invalid(form)
             return super().form_valid(form)
-
-'''
-@login_required
-@permission_required("products.change_product", raise_exception=True)
-def edit_product(request, pk):
-    product = get_object_or_404(Product, pk=pk, owner=request.user)
-
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
-
-        if form.is_valid():
-            product = form.save(commit=False)
-            try:
-                product.full_clean()
-            except ValidationError as exc:
-                for field, errors in exc.message_dict.items():
-                    for error in errors:
-                        form.add_error(field, error)
-                return render(request, "products/product_Form.html", {"form":form})
-             
-            product.save()
-            form.save_m2m()
-            return redirect("product_form")            
-    else:
-        form = ProductForm(instance=product)
-    return render(request, "products/product_form.html", {"form": form})
-'''
 
 
 class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, DeleteView):
