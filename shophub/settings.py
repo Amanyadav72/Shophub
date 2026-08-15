@@ -34,6 +34,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Django REST Framework Global Settings
+REST_FRAMEWORK = {
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1', 'v2'],
+    'VERSION_PARAM': 'version',
+}
+
 
 # Application definition
 
