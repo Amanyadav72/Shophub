@@ -50,6 +50,8 @@ REST_FRAMEWORK = {
         'anon': '100/day',       # Unauthenticated requests
         'user': '1000/day',      # Authenticated requests
     },
+    # Standardized Response Handler
+    'EXCEPTION_HANDLER': 'products.exceptions.custom_exception_handler',
 }
 
 
