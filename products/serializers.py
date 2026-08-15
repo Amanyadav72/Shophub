@@ -14,9 +14,9 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'description', 'price', 'image', 
             'status', 'categories', 'stock', 'is_available', 
-            'owner', 'created_at'
+            'created_at'
         ]
-        read_only_fields = ['owner', 'created_at']
+        read_only_fields = ['created_at']
 
     def validate_image(self, value):
         if value:

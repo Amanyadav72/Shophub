@@ -65,6 +65,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'products',
+    'accounts.apps.AccountsConfig',
+    'cart',
+    'orders',
     'debug_toolbar',
     'rest_framework',
     'django_filters',
@@ -150,8 +153,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-MEDIA_url = "/media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 INTERNAL_IPS = [
     "127.0.0.1",

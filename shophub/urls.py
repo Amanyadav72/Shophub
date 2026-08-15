@@ -27,6 +27,9 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # 2. This endpoint provides the beautiful Swagger UI web page
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/<str:version>/', include('accounts.urls')),
+    path('api/<str:version>/', include('cart.urls')),
+    path('api/<str:version>/', include('orders.urls')),
 
     path("__debug__/", include("debug_toolbar.urls")),
     path('', include('products.urls')),
@@ -34,6 +37,3 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += [
-        path("__debug__/", include("debug_toolbar.urls")),
-    ]

@@ -15,8 +15,7 @@ from django.db.models import Q
 #from rest_framework.response import Response
 from rest_framework import viewsets
 from .serializers import ProductSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsStaffOrReadOnly
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter
@@ -179,7 +178,9 @@ def change_password(request):
 class ProductViewSet(viewsets.ModelViewSet):
     #queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    # ShopHub is a single-store application: customers browse products while
+    # staff manage the catalogue through this API or Django admin.
+    permission_classes = [IsStaffOrReadOnly]
 
     pagination_class = ShopHubPagination
     # 1. Register the Filter Backends
@@ -200,10 +201,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if not user.is_authenticated:
             qs = Product.objects.published().prefetch_related("categories")
-        elif user.is_superuser:
+        elif user.is_staff:
             qs = Product.objects.all().select_related("owner").prefetch_related("categories")
-        elif user.has_perm("products.add_product"):
-            qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
         else:
             qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
