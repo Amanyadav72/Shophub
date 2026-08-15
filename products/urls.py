@@ -8,7 +8,7 @@ router = DefaultRouter()
 router.register(r'products', views.ProductViewSet, basename='product')
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("api/<str:version>/", include(router.urls)),
 
     path("", views.ProductListView.as_view(), name="home"),
     path("product-form/", views.ProductCreateView.as_view(), name="product_form"),
