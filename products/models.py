@@ -98,25 +98,3 @@ class SellerProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
-
-
-#learning Purpose
-#Thuough Model Only need when categories will have extra atribute after that django wont 
-# abl to automaticaly do join table
-"""class ProductCategory(models.Model):
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-    )
-
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.CASCADE,
-    )
-
-    is_primary = models.BooleanField(default=False)
-
-    assigned_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.product.name} -> {self.category.name}"""
