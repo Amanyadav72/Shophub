@@ -4,3 +4,4 @@ django-filter>=25.1,<27
 drf-spectacular>=0.28,<0.31
 django-debug-toolbar>=5,<8
 Pillow>=11,<13
+python-dotenv>=1.2,<2

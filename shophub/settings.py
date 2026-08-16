@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
@@ -21,25 +25,28 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--dn@7#6t0&rho8nn4ak^c0y+n@1b$j4bs3u_81a@9&h$hfa6v1'
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is false.")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [host for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if host]
 
 # Django REST Framework Global Settings
 REST_FRAMEWORK = {
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
-    'DEFAULT_VERSION': 'v1',
-    'ALLOWED_VERSIONS': ['v1', 'v2'],
-    'VERSION_PARAM': 'version',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 1. Production Throttling (Rate Limiting)
     'DEFAULT_THROTTLE_CLASSES': [
@@ -56,7 +63,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ShopHub API',
-    'DESCRIPTION': 'Product catalogue API. Public users can browse published products; authenticated users manage only their own products.',
+    'DESCRIPTION': 'Single-store e-commerce API. Products are managed only through the staff Django site.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }

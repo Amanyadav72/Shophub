@@ -14,7 +14,7 @@ User = get_user_model()
 
 class ProductModelTests(TestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(username="owner", password="password123")
+        self.owner = User.objects.create_user(username="owner", password="password123", is_staff=True)
 
     def product(self, **overrides):
         data = {"owner": self.owner, "name": "Camera", "description": "Compact camera", "price": Decimal("99.99"), "stock": 1}
@@ -26,24 +26,17 @@ class ProductModelTests(TestCase):
         with self.assertRaises(ValidationError):
             product.full_clean()
 
-    def test_published_product_requires_stock(self):
+    def test_published_product_with_zero_stock_is_valid_but_not_customer_visible(self):
         product = self.product(stock=0, status=Product.Status.PUBLISHED)
-        with self.assertRaises(ValidationError):
-            product.full_clean()
-
-    def test_availability_is_derived_from_stock(self):
-        product = self.product(stock=0, is_available=True)
+        product.full_clean()
         product.save()
-        self.assertFalse(product.is_available)
-        product.stock = 3
-        product.save()
-        self.assertTrue(product.is_available)
+        self.assertFalse(Product.objects.published().filter(pk=product.pk).exists())
 
 
 class ProductTemplateOwnershipTests(TestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(username="owner", password="password123")
-        self.other = User.objects.create_user(username="other", password="password123")
+        self.owner = User.objects.create_user(username="owner", password="password123", is_staff=True)
+        self.other = User.objects.create_user(username="other", password="password123", is_staff=True)
         self.product = Product.objects.create(owner=self.owner, name="Keyboard", description="Mechanical", price="50.00", stock=2, status=Product.Status.PUBLISHED)
 
     def test_my_products_is_owner_scoped(self):
@@ -78,16 +71,15 @@ class ProductAPITests(APITestCase):
         names = [item["name"] for item in response.data["results"]]
         self.assertEqual(names, ["Mouse"])
 
-    def test_authenticated_owner_can_create_product(self):
+    def test_authenticated_customer_cannot_create_product(self):
         self.client.force_authenticate(self.owner)
         response = self.client.post(self.url, {"name": "Monitor", "description": "4K", "price": "400.00", "stock": 1, "status": "PB"}, format="json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Product.objects.get(name="Monitor").owner, self.owner)
+        self.assertEqual(response.status_code, 405)
 
-    def test_non_owner_cannot_update_product(self):
+    def test_product_api_disallows_updates(self):
         self.client.force_authenticate(self.other)
         response = self.client.patch(f"{self.url}{self.published.pk}/", {"price": "30.00"}, format="json")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 405)
 
     def test_openapi_schema_is_available(self):
         response = self.client.get("/api/schema/")

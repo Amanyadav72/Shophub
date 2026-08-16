@@ -28,9 +28,9 @@ urlpatterns = [
     # 2. This endpoint provides the beautiful Swagger UI web page
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/v1/', include('products.api.urls')),
-    path('api/<str:version>/', include('accounts.urls')),
-    path('api/<str:version>/', include('cart.urls')),
-    path('api/<str:version>/', include('orders.urls')),
+    path('api/v1/', include('accounts.urls')),
+    path('api/v1/', include('cart.urls')),
+    path('api/v1/', include('orders.urls')),
 
     path("__debug__/", include("debug_toolbar.urls")),
     path('', include('products.urls')),

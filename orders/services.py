@@ -27,7 +27,7 @@ def checkout(user, address_id):
     subtotal = Decimal("0.00")
     for item in items:
         product = item.product
-        if product.status != product.Status.PUBLISHED or not product.is_available:
+        if product.status != product.Status.PUBLISHED or product.stock <= 0:
             raise ValidationError(f"{product.name} is no longer available.")
         if item.quantity > product.stock:
             raise ValidationError(f"Only {product.stock} unit(s) of {product.name} are available.")
@@ -48,12 +48,7 @@ def checkout(user, address_id):
             unit_price=product.price, quantity=item.quantity, subtotal=line_total,
         ))
         product.stock -= item.quantity
-        if product.stock == 0:
-            product.status = product.Status.OUT_OF_STOCK
-            product.is_available = False
-            product.save(update_fields=("stock", "status", "is_available", "updated_at"))
-        else:
-            product.save(update_fields=("stock", "updated_at"))
+        product.save(update_fields=("stock", "updated_at"))
     OrderItem.objects.bulk_create(order_items)
     CartItem.objects.filter(pk__in=[item.pk for item in items]).delete()
     return order

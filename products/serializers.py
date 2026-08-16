@@ -13,7 +13,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'description', 'price', 'image', 
-            'status', 'categories', 'stock', 'is_available', 
+            'status', 'categories', 'stock',
             'created_at'
         ]
         read_only_fields = ['created_at']
@@ -32,13 +32,7 @@ class ProductSerializer(serializers.ModelSerializer):
         status = data.get('status', self.instance.status if self.instance else 'DR')
         name = data.get('name', self.instance.name if self.instance else None)
         
-        # 1. Block out-of-stock published products
-        if stock == 0 and status == 'PB':
-            raise serializers.ValidationError(
-                {"status": "Out of stock products cannot be published."}
-            )
-
-        # 2. Block duplicate names for the same owner
+        # Block duplicate names for the same owner
         request = self.context.get('request')
         owner = request.user if request else None
 

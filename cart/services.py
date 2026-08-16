@@ -14,7 +14,7 @@ def get_cart(user):
 @transaction.atomic
 def add_item(user, product_id, quantity):
     product = Product.objects.select_for_update().get(pk=product_id)
-    if product.status != Product.Status.PUBLISHED or not product.is_available:
+    if product.status != Product.Status.PUBLISHED or product.stock <= 0:
         raise ValidationError("This product is not currently available.")
     cart = get_cart(user)
     item, created = CartItem.objects.select_for_update().get_or_create(

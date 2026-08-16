@@ -22,7 +22,7 @@ class Category(models.Model):
 
 class ProductQuerySet(models.QuerySet):
     def published(self):
-        """Return catalogue products that customers can buy."""
+        """Return in-stock products visible in the public catalogue."""
         return self.filter(status=Product.Status.PUBLISHED, stock__gt=0)
     def by_owner(self,user):
         """Returns products owned by a specific user."""
@@ -33,7 +33,6 @@ class Product(TimeStampModel):
     class Status(models.TextChoices):
        DRAFT = "DR", "Draft"
        PUBLISHED = "PB", "Published"
-       OUT_OF_STOCK = "OS", "Out of Stock"
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -52,7 +51,6 @@ class Product(TimeStampModel):
     )
     stock = models.PositiveIntegerField(default=0)
 
-    is_available = models.BooleanField(default=False, editable=False)
     categories = models.ManyToManyField(Category, blank=True)
 
     def clean(self):
@@ -63,12 +61,6 @@ class Product(TimeStampModel):
         if self.price is not None and self.price < 0:
             errors["price"] = "Price cannot be negative."
 
-        if self.status == self.Status.PUBLISHED and self.stock == 0:
-            errors["status"] = "A published product must have stock."
-
-        if self.status == self.Status.OUT_OF_STOCK and self.stock > 0:
-            errors["status"] = "Only products with zero stock can be marked out of stock."
-
         existing_product = Product.objects.none()
         if self.owner_id:
             existing_product = Product.objects.filter(owner_id=self.owner_id, name=self.name).exclude(pk=self.pk)
@@ -76,11 +68,6 @@ class Product(TimeStampModel):
             errors["name"] = "You already have a product with this name."
         if errors:
             raise ValidationError(errors)
-
-    def save(self, *args, **kwargs):
-        """Availability is derived from stock and cannot contradict it."""
-        self.is_available = self.stock > 0
-        super().save(*args, **kwargs)
 
     objects = ProductQuerySet.as_manager()
     
@@ -93,7 +80,7 @@ class Product(TimeStampModel):
             name="unique_product_per_owner",
         )]
         indexes = [
-            models.Index(fields=["status", "is_available"]),
+            models.Index(fields=["status", "stock"]),
             models.Index(fields=["name"]),
         ]
     

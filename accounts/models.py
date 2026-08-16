@@ -1,13 +1,12 @@
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customer_profile")
     phone = models.CharField(max_length=20, blank=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
-    date_of_birth = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,11 +38,15 @@ class Address(models.Model):
     class Meta:
         ordering = ["-is_default", "-updated_at"]
 
-    def clean(self):
-        if self.is_default and self.user_id:
-            exists = Address.objects.filter(user=self.user, is_default=True).exclude(pk=self.pk).exists()
-            if exists:
-                raise ValidationError({"is_default": "Only one default address is allowed per customer."})
-
     def __str__(self):
         return f"{self.recipient_name} — {self.city}"
+
+    class Meta:
+        ordering = ["-is_default", "-updated_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user",),
+                condition=Q(is_default=True),
+                name="one_default_address_per_user",
+            )
+        ]

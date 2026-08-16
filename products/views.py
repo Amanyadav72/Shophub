@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.contrib import messages
 
@@ -20,24 +20,35 @@ class ProductListView(ListView):
     paginate_by = 4
 
     def get_queryset(self):
-        user = self.request.user
+       user = self.request.user
 
+       if not user.is_authenticated:
+        qs = Product.objects.published().prefetch_related("categories")
+       elif user.is_superuser:
+        qs = Product.objects.all().select_related("owner").prefetch_related("categories")
+       elif user.has_perm("products.add_product"):
+        qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
+       else:
         qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
-        search_query = self.request.GET.get('q')
-        category_filter = self.request.GET.get('category')
-        ordering = self.request.GET.get('ordering')
-        if search_query:
-            qs = qs.filter(
-                Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(categories__name__icontains=search_query)
-                ).distinct()
-        if category_filter:
-            qs =qs.filter(categories__name=category_filter)
-        if ordering:
-            if ordering in ['price','-price','-created_at']:
-                qs = qs.order_by(ordering)
+       search_query = self.request.GET.get("q")
+       category_filter = self.request.GET.get("category")
+       ordering = self.request.GET.get("ordering")
 
-        return qs
+       if search_query:
+         qs = qs.filter(
+            Q(name__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(categories__name__icontains=search_query)
+          ).distinct()
+
+       if category_filter:
+         qs = qs.filter(categories__name=category_filter)
+
+       if ordering in ["price", "-price", "-created_at"]:
+         qs = qs.order_by(ordering)
+
+       return qs
     
 
 class ProductDetailView(DetailView):
@@ -52,7 +63,16 @@ class ProductDetailView(DetailView):
         return public.select_related("owner").prefetch_related("categories")
 
 
-class MyProductListView(LoginRequiredMixin, ListView):
+class SellerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Restrict store-management pages to staff users."""
+
+    raise_exception = True
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class MyProductListView(SellerRequiredMixin, ListView):
     model = Product
     template_name = "products/my_products.html"
     context_object_name = "products"
@@ -62,7 +82,7 @@ class MyProductListView(LoginRequiredMixin, ListView):
         return Product.objects.by_owner(self.request.user).prefetch_related("categories")
 
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
+class ProductCreateView(SellerRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = "products/product_Form.html"
@@ -77,7 +97,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
-class OwnerProductMixin(LoginRequiredMixin):
+class OwnerProductMixin(SellerRequiredMixin):
     def get_queryset(self):
         return Product.objects.by_owner(self.request.user)
 
@@ -157,12 +177,18 @@ def change_password(request):
 
 @login_required
 def seller_profile(request):
+    if not request.user.is_staff:
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
     profile, _ = SellerProfile.objects.get_or_create(user=request.user)
     return render(request, "products/profile.html", {"profile": profile})
 
 
 @login_required
 def seller_profile_edit(request):
+    if not request.user.is_staff:
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
     profile, _ = SellerProfile.objects.get_or_create(user=request.user)
     form = SellerProfileForm(request.POST or None, instance=profile)
     if request.method == "POST" and form.is_valid():
