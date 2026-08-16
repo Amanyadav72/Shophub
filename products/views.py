@@ -1,25 +1,17 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product
-from .forms import ProductForm, RegisterForm
+from django.shortcuts import render, redirect
+from .models import Product, SellerProfile
+from .forms import ProductForm, RegisterForm, SellerProfileForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-#from rest_framework.views import APIView
-#from rest_framework.response import Response
-from rest_framework import viewsets
-from .serializers import ProductSerializer
-from .permissions import IsStaffOrReadOnly
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import ProductFilter
-from .pagination import ShopHubPagination
+from django.contrib import messages
 
 class ProductListView(ListView):
     model = Product
@@ -30,14 +22,7 @@ class ProductListView(ListView):
     def get_queryset(self):
         user = self.request.user
 
-        if not user.is_authenticated:
-            qs = Product.objects.published().prefetch_related("categories")
-        elif user.is_superuser:
-            qs = Product.objects.all().select_related("owner").prefetch_related("categories")
-        elif user.has_perm("products.add_product"):
-            qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
-        else:
-            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
+        qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
         search_query = self.request.GET.get('q')
         category_filter = self.request.GET.get('category')
@@ -60,63 +45,59 @@ class ProductDetailView(DetailView):
     template_name = "products/product_detail.html"
     context_object_name = "product"
 
+    def get_queryset(self):
+        public = Product.objects.published()
+        if self.request.user.is_authenticated:
+            public = public | Product.objects.by_owner(self.request.user)
+        return public.select_related("owner").prefetch_related("categories")
 
-class ProductCreateView(LoginRequiredMixin, PermissionRequiredMixin,CreateView):
+
+class MyProductListView(LoginRequiredMixin, ListView):
+    model = Product
+    template_name = "products/my_products.html"
+    context_object_name = "products"
+    paginate_by = 8
+
+    def get_queryset(self):
+        return Product.objects.by_owner(self.request.user).prefetch_related("categories")
+
+
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = "products/product_Form.html"
-    success_url = reverse_lazy("product_form")    # Redirects back to the empty form as you requested
-    permission_required = "products.add_product"  # This replaces the @permission_required decorator
+    success_url = reverse_lazy("my_products")
 
     def form_valid(self, form):
         # 1. Attach the logged-in user to the product
         form.instance.owner = self.request.user
 
-        try:
-            form.instance.full_clean()
-        except ValidationError as exc:
-            for feild, errors in exc.message_dict.items():
-                for error in errors:
-                    form.add_error(feild, error)
-            return self.form_invalid(form) # 2. Run your custom model validations (like the out-of-stock check)
-        # 3. Save to database
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, "Product created.")
+        return response
 
 
-class ProductUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
+class OwnerProductMixin(LoginRequiredMixin):
+    def get_queryset(self):
+        return Product.objects.by_owner(self.request.user)
+
+
+class ProductUpdateView(OwnerProductMixin, UpdateView):
     model = Product
     form_class = ProductForm
     template_name = "products/product_Form.html"
-    success_url = reverse_lazy("home")
-    permission_required = "products.change_product"
-
-    def test_func(self):
-        # self.get_object() fetches the product we are trying to edit
-        product = self.get_object()
-        # Return True only if the logged-in user is the owner
-        return product.owner == self.request.user
+    success_url = reverse_lazy("my_products")
 
     def form_valid(self, form):
-            try:
-                form.instance.full_clean()
-            except ValidationError as exc:
-                for feild, errors in exc.message_dict.items():
-                    for error in errors:
-                        form.add_error(feild, error)
-                return self.form_invalid(form)
-            return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, "Product updated.")
+        return response
 
 
-class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, DeleteView):
+class ProductDeleteView(OwnerProductMixin, DeleteView):
     model = Product
     template_name = "products/product_confirm_delete.html"
-    success_url = reverse_lazy("home")
-    permission_required = "products.delete_product"
-
-    def test_func(self):
-        # Exact same object-level security as UpdateView!
-        product = self.get_object()
-        return product.owner == self.request.user
+    success_url = reverse_lazy("my_products")
     
     
 def register(request):
@@ -173,40 +154,19 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, "products/change_password.html", {"form":form})
 
-#Django REST Framework API's
 
-class ProductViewSet(viewsets.ModelViewSet):
-    #queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    # ShopHub is a single-store application: customers browse products while
-    # staff manage the catalogue through this API or Django admin.
-    permission_classes = [IsStaffOrReadOnly]
+@login_required
+def seller_profile(request):
+    profile, _ = SellerProfile.objects.get_or_create(user=request.user)
+    return render(request, "products/profile.html", {"profile": profile})
 
-    pagination_class = ShopHubPagination
-    # 1. Register the Filter Backends
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    
-    # 2. Exact Filtering (Updated to match your model's field name)
-    #filterset_fields = ['categories']
-    filterset_class = ProductFilter
-    
-    # 3. Text Searching (Updated to span the categories relationship)
-    search_fields = ['name', 'description', 'categories__name'] 
-    
-    # 4. Sorting
-    ordering_fields = ['price', 'created_at']
 
-    def get_queryset(self):
-        user = self.request.user
-
-        if not user.is_authenticated:
-            qs = Product.objects.published().prefetch_related("categories")
-        elif user.is_staff:
-            qs = Product.objects.all().select_related("owner").prefetch_related("categories")
-        else:
-            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
-
-        return qs   
-
-    def perform_create(self, serializer):
-        return serializer.save(owner=self.request.user)
+@login_required
+def seller_profile_edit(request):
+    profile, _ = SellerProfile.objects.get_or_create(user=request.user)
+    form = SellerProfileForm(request.POST or None, instance=profile)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profile updated.")
+        return redirect("seller_profile")
+    return render(request, "products/profile_form.html", {"form": form})

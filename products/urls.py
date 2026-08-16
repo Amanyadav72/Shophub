@@ -1,24 +1,19 @@
 from django.urls import path, include
 from . import views
 from django.contrib.auth import views as auth_views
-from rest_framework.routers import DefaultRouter
-
-router = DefaultRouter()
-#registered ProductViewSet with prefix ('products')
-router.register(r'products', views.ProductViewSet, basename='product')
-
 urlpatterns = [
-    path("api/<str:version>/", include(router.urls)),
-
     path("", views.ProductListView.as_view(), name="home"),
-    path("product-form/", views.ProductCreateView.as_view(), name="product_form"),
-    path("product/<int:pk>/edit/", views.ProductUpdateView.as_view(), name="edit_product"),
-    path("product/<int:pk>/delete/", views.ProductDeleteView.as_view(), name = "delete_product"),
+    path("my-products/", views.MyProductListView.as_view(), name="my_products"),
+    path("my-products/create/", views.ProductCreateView.as_view(), name="product_form"),
+    path("my-products/<int:pk>/edit/", views.ProductUpdateView.as_view(), name="edit_product"),
+    path("my-products/<int:pk>/delete/", views.ProductDeleteView.as_view(), name = "delete_product"),
     path("product-detail/<int:pk>/", views.ProductDetailView.as_view(), name="product_detail"),
     path("register/",views.register, name="register"  ),
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),
     path("change-password/", views.change_password, name="change_password"),
+    path("profile/", views.seller_profile, name="seller_profile"),
+    path("profile/edit/", views.seller_profile_edit, name="seller_profile_edit"),
     path(
          "password-reset/",
          auth_views.PasswordResetView.as_view

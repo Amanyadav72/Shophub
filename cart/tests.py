@@ -11,6 +11,7 @@ class CartServiceTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="customer", password="secret")
         self.product = Product.objects.create(
+            owner=self.user,
             name="Keyboard", description="Mechanical", price="2500.00", stock=5,
             status=Product.Status.PUBLISHED,
         )

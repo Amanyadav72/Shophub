@@ -1,14 +1,1 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Product Detail</title>
-</head>
-<body>
-    <h1>Product Detail</h1>
-    <p>Name :{{product.name}}</p>
-    <p>Price: {{product.price}}</p>
-
-
-    <p><a href=""></a></p>
-</body>
-</html>
+{% extends "products/base.html" %}{% block title %}{{ product.name }} · ShopHub{% endblock %}{% block content %}<article class="form-card">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%">{% endif %}<h1>{{ product.name }}</h1><p>₹{{ product.price }}</p><p>{{ product.description }}</p><p>{{ product.stock }} available</p>{% if product.owner == user %}<a class="button" href="{% url 'edit_product' product.pk %}">Edit product</a>{% endif %}</article>{% endblock %}

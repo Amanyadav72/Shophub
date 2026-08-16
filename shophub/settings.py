@@ -54,6 +54,13 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'products.exceptions.custom_exception_handler',
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ShopHub API',
+    'DESCRIPTION': 'Product catalogue API. Public users can browse published products; authenticated users manage only their own products.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
 
 # Application definition
 

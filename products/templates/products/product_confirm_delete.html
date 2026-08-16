@@ -1,14 +1,1 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Product</title>
-</head>
-<body>
-    <h1>Are you sure you want to delete "{{ product.name }}"?</h1>
-    <form method="POST">
-        {% csrf_token %}
-        <button type="submit">Yes, Delete</button>
-        <a href="{% url 'home' %}">Cancel</a>
-    </form>
-</body>
-</html>
+{% extends "products/base.html" %}{% block title %}Delete product · ShopHub{% endblock %}{% block content %}<section class="form-card"><h1>Delete {{ product.name }}?</h1><p>This cannot be undone.</p><form method="post">{% csrf_token %}<button type="submit">Delete product</button> <a href="{% url 'my_products' %}">Cancel</a></form></section>{% endblock %}

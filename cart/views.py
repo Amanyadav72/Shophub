@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from .models import CartItem
 from .serializers import AddCartItemSerializer, CartSerializer, UpdateCartItemSerializer
@@ -18,6 +19,7 @@ def serialized_cart(user):
 class CartAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(responses=CartSerializer, summary="Retrieve the current cart")
     def get(self, request):
         return Response(serialized_cart(request.user))
 
@@ -25,6 +27,7 @@ class CartAPIView(APIView):
 class CartItemAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(request=AddCartItemSerializer, responses=CartSerializer, summary="Add an item to the current cart")
     def post(self, request):
         serializer = AddCartItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -38,6 +41,7 @@ class CartItemAPIView(APIView):
 class CartItemDetailAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(request=UpdateCartItemSerializer, responses=CartSerializer, summary="Change a cart item quantity")
     def patch(self, request, pk):
         serializer = UpdateCartItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -49,6 +53,7 @@ class CartItemDetailAPIView(APIView):
             return Response({"detail": error.message}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serialized_cart(request.user))
 
+    @extend_schema(responses={204: None}, summary="Remove an item from the current cart")
     def delete(self, request, pk):
         item = get_object_or_404(CartItem, pk=pk, cart__user=request.user)
         item.delete()

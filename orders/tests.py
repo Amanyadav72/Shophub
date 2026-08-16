@@ -16,6 +16,7 @@ class CheckoutServiceTests(TestCase):
             city="Delhi", state="Delhi", postal_code="110001",
         )
         product = Product.objects.create(
+            owner=user,
             name="Keyboard", description="Mechanical", price="2500.00", stock=2,
             status=Product.Status.PUBLISHED,
         )

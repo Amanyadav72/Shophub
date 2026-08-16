@@ -22,8 +22,8 @@ class Category(models.Model):
 
 class ProductQuerySet(models.QuerySet):
     def published(self):
-        """Returns only published and available products."""
-        return self.filter(status="PB", is_available=True)
+        """Return catalogue products that customers can buy."""
+        return self.filter(status=Product.Status.PUBLISHED, stock__gt=0)
     def by_owner(self,user):
         """Returns products owned by a specific user."""
         return self.filter(owner=user)
@@ -38,8 +38,6 @@ class Product(TimeStampModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="products",
-        null=True,
-        blank=True,
     )
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to="products/", blank=True, null=True)
@@ -52,24 +50,37 @@ class Product(TimeStampModel):
         choices=Status,
         default=Status.DRAFT,
     )
-    stock = models.IntegerField(default=0)
-    def clean(self):
-        existing_product = Product.objects.filter(
-                    owner=self.owner,
-                    name=self.name,
-                ).exclude(pk=self.pk)
-        if self.stock == 0 and self.status == self.Status.PUBLISHED:
-            raise ValidationError(
-                {"status": "Out of stock products cannot be published."}
-            )
-        
-        if existing_product.exists():
-            raise ValidationError({
-                "name": "You already have a product with this name."
-        })
+    stock = models.PositiveIntegerField(default=0)
 
-    is_available = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=False, editable=False)
     categories = models.ManyToManyField(Category, blank=True)
+
+    def clean(self):
+        errors = {}
+        if not self.owner_id:
+            errors["owner"] = "Every product must have an owner."
+
+        if self.price is not None and self.price < 0:
+            errors["price"] = "Price cannot be negative."
+
+        if self.status == self.Status.PUBLISHED and self.stock == 0:
+            errors["status"] = "A published product must have stock."
+
+        if self.status == self.Status.OUT_OF_STOCK and self.stock > 0:
+            errors["status"] = "Only products with zero stock can be marked out of stock."
+
+        existing_product = Product.objects.none()
+        if self.owner_id:
+            existing_product = Product.objects.filter(owner_id=self.owner_id, name=self.name).exclude(pk=self.pk)
+        if existing_product.exists():
+            errors["name"] = "You already have a product with this name."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        """Availability is derived from stock and cannot contradict it."""
+        self.is_available = self.stock > 0
+        super().save(*args, **kwargs)
 
     objects = ProductQuerySet.as_manager()
     
@@ -92,8 +103,8 @@ class Product(TimeStampModel):
 
 class SellerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
-    phone = models.CharField(max_length=15)
-    address = models.TextField()
+    phone = models.CharField(max_length=15, blank=True)
+    address = models.TextField(blank=True)
     bio = models.TextField(blank=True)
 
     def __str__(self):

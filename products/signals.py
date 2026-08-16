@@ -1,11 +1,5 @@
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+"""Product signals.
 
-from .models import SellerProfile
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_seller_profile(sender, instance, created, **kwargs):
-    if created:
-        SellerProfile.objects.create(user=instance)
+Seller profiles are deliberately created only when a user opens their
+template-based profile page; registration must not create one automatically.
+"""

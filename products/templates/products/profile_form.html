@@ -1,0 +1,1 @@
+{% extends "products/base.html" %}{% block title %}Edit Profile · ShopHub{% endblock %}{% block content %}<section class="form-card"><h1>Edit seller profile</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button class="button" type="submit">Save profile</button></form></section>{% endblock %}

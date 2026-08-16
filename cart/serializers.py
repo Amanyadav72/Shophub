@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from rest_framework import serializers
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 
 from .models import Cart, CartItem
 
@@ -16,6 +18,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ("id", "product_id", "product_name", "image", "unit_price", "quantity", "subtotal")
 
+    @extend_schema_field(OpenApiTypes.DECIMAL)
     def get_subtotal(self, obj):
         return obj.product.price * obj.quantity
 
@@ -29,9 +32,11 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ("id", "items", "item_count", "subtotal", "updated_at")
 
+    @extend_schema_field(OpenApiTypes.DECIMAL)
     def get_subtotal(self, obj):
         return sum((item.product.price * item.quantity for item in obj.items.all()), Decimal("0.00"))
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_item_count(self, obj):
         return sum(item.quantity for item in obj.items.all())
 

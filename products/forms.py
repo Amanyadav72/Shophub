@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product
+from .models import Product, SellerProfile
 from django.contrib.auth.forms import UserCreationForm
 
 class RegisterForm(UserCreationForm):
@@ -9,7 +9,7 @@ class RegisterForm(UserCreationForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "image","description", "price", "stock", "categories","is_available","status"]
+        fields = ["name", "image", "description", "price", "stock", "categories", "status"]
     
         widgets = {
         "description": forms.Textarea(
@@ -20,8 +20,9 @@ class ProductForm(forms.ModelForm):
                 ),
             }
    
-    def clean_stock(self):
-        stock = self.cleaned_data["stock"]
-        if stock < 0:
-            raise forms.ValidationError("Stock cannot be negative.")
-        return stock
+
+class SellerProfileForm(forms.ModelForm):
+    class Meta:
+        model = SellerProfile
+        fields = ["phone", "address", "bio"]
+        widgets = {"address": forms.Textarea(attrs={"rows": 3})}

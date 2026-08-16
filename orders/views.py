@@ -3,6 +3,7 @@ from accounts.models import Address
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from .models import Order
 from .serializers import CheckoutSerializer, OrderSerializer
@@ -12,6 +13,7 @@ from .services import checkout
 class CheckoutAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(request=CheckoutSerializer, responses=OrderSerializer, summary="Create an order from the current cart")
     def post(self, request):
         serializer = CheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
