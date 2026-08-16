@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Product, SellerProfile
+from .models import Product, SellerProfile, Category
 from .forms import ProductForm, RegisterForm, SellerProfileForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login, logout, update_session_auth_hash
@@ -13,42 +13,48 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.contrib import messages
 
+
 class ProductListView(ListView):
     model = Product
     template_name = "products/home.html"
     context_object_name = "products"
     paginate_by = 4
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.order_by("name")
+        return context
+
     def get_queryset(self):
-       user = self.request.user
+        user = self.request.user
 
-       if not user.is_authenticated:
-        qs = Product.objects.published().prefetch_related("categories")
-       elif user.is_superuser:
-        qs = Product.objects.all().select_related("owner").prefetch_related("categories")
-       elif user.has_perm("products.add_product"):
-        qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
-       else:
-        qs = Product.objects.published().select_related("owner").prefetch_related("categories")
+        if not user.is_authenticated:
+            qs = Product.objects.published().prefetch_related("categories")
+        elif user.is_superuser:
+            qs = Product.objects.all().select_related("owner").prefetch_related("categories")
+        elif user.has_perm("products.add_product"):
+            qs = Product.objects.by_owner(user).select_related("owner").prefetch_related("categories")
+        else:
+            qs = Product.objects.published().select_related("owner").prefetch_related("categories")
 
-       search_query = self.request.GET.get("q")
-       category_filter = self.request.GET.get("category")
-       ordering = self.request.GET.get("ordering")
+        search_query = self.request.GET.get("q")
+        category_filter = self.request.GET.get("category")
+        ordering = self.request.GET.get("ordering")
 
-       if search_query:
-         qs = qs.filter(
-            Q(name__icontains=search_query)
-            | Q(description__icontains=search_query)
-            | Q(categories__name__icontains=search_query)
-          ).distinct()
+        if search_query:
+            qs = qs.filter(
+                Q(name__icontains=search_query)
+                | Q(description__icontains=search_query)
+                | Q(categories__name__icontains=search_query)
+            ).distinct()
 
-       if category_filter:
-         qs = qs.filter(categories__name=category_filter)
+        if category_filter:
+            qs = qs.filter(categories__name=category_filter)
 
-       if ordering in ["price", "-price", "-created_at"]:
-         qs = qs.order_by(ordering)
+        if ordering in ["price", "-price", "-created_at"]:
+            qs = qs.order_by(ordering)
 
-       return qs
+        return qs
     
 
 class ProductDetailView(DetailView):

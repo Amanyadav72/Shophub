@@ -1,8 +1,78 @@
 {% extends "products/base.html" %}
 {% block title %}Shop · ShopHub{% endblock %}
+
 {% block content %}
-<div class="heading"><h1>Discover products</h1>{% if user.is_authenticated %}<a class="button" href="{% url 'product_form' %}">Sell a product</a>{% endif %}</div>
-<form method="get" class="form-card" style="max-width:none;margin-bottom:1.5rem"><input name="q" value="{{ request.GET.q }}" placeholder="Search products"><input name="category" value="{{ request.GET.category }}" placeholder="Category"><select name="ordering"><option value="">Newest</option><option value="price">Price: low to high</option><option value="-price">Price: high to low</option></select><button type="submit">Apply</button></form>
-{% if products %}<div class="grid">{% for product in products %}<article class="card">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}<h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2><p>₹{{ product.price }}</p><p>{{ product.categories.all|join:", " }}</p></article>{% endfor %}</div>{% else %}<section class="empty"><h2>No matching products</h2></section>{% endif %}
-{% if is_paginated %}<p>{% if page_obj.has_previous %}<a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %} Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} {% if page_obj.has_next %}<a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}</p>{% endif %}
+<div class="heading">
+    <h1>Discover products</h1>
+    {% if user.is_authenticated %}
+      <a class="button" href="{% url 'product_form' %}">Sell a product</a>
+    {% endif %}
+</div>
+
+<form method="get" action="{% url 'home' %}" class="form-card" style="max-width:none; margin-bottom:1.5rem;">
+    {% if request.GET.category %}
+        <input type="hidden" name="category" value="{{ request.GET.category }}">
+    {% endif %}
+
+    <div style="display:flex; gap:.75rem; align-items:center;">
+        <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search products by name...">
+        <button type="submit">Search</button>
+    </div>
+</form>
+
+<div class="form-card" style="margin-bottom:1.5rem;">
+    <strong>Filter by Category:</strong>
+
+    <div style="display:flex; flex-wrap:wrap; gap:.75rem; margin-top:.75rem;">
+        {% for category in categories %}
+            <a href="?q={{ request.GET.q|urlencode }}&category={{ category.name|urlencode }}&ordering={{ request.GET.ordering|urlencode }}">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+        <a href="{% url 'home' %}">Clear Filters</a>
+    </div>
+</div>
+
+<div class="form-card" style="margin-bottom:1.5rem;">
+    <strong>Sort By:</strong>
+
+    <div style="display:flex; flex-wrap:wrap; gap:.75rem; margin-top:.75rem;">
+        <a href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=price">Price: Low to High</a>
+        <a href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=-price">Price: High to Low</a>
+        <a href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=-created_at">Newest Arrivals</a>
+    </div>
+</div>
+
+{% if products %}
+<div class="grid">
+    {% for product in products %}
+    <article class="card">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% endif %}
+        <h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2>
+        <p>₹{{ product.price }}</p>
+        <p>{{ product.categories.all|join:", " }}</p>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<section class="empty">
+    <h2>No matching products</h2>
+</section>
+{% endif %}
+
+{% if is_paginated %}
+<p>
+    {% if page_obj.has_previous %}
+        <a href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+    {% if page_obj.has_next %}
+        <a href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</p>
+{% endif %}
 {% endblock %}

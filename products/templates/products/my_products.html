@@ -1,1 +1,16 @@
-{% extends "products/base.html" %}{% block title %}My Products · ShopHub{% endblock %}{% block content %}<div class="heading"><h1>My Products</h1><a class="button" href="{% url 'product_form' %}">Add product</a></div>{% if products %}<div class="grid">{% for product in products %}<article class="card">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}<h2>{{ product.name }}</h2><p>₹{{ product.price }} · {{ product.stock }} in stock</p><p>{{ product.get_status_display }}</p><a href="{% url 'edit_product' product.pk %}">Edit</a> · <a class="danger" href="{% url 'delete_product' product.pk %}">Delete</a></article>{% endfor %}</div>{% else %}<section class="empty"><h2>No products yet</h2><p>Create your first product to begin.</p></section>{% endif %}{% endblock %}
+{% extends "products/base.html" %}
+{% block title %}My Products · ShopHub{% endblock %}
+{% block content %}
+<div class="heading">
+    <h1>My Products</h1><a class="button" href="{% url 'product_form' %}">Add product</a>
+</div>
+{% if products %}
+<div class="grid">
+    {% for product in products %}<article class="card">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}<h2>{{ product.name }}</h2><p>₹{{ product.price }} · {{ product.stock }} in stock</p><p>{{ product.get_status_display }}</p><a href="{% url 'edit_product' product.pk %}">Edit</a> · <a class="danger" href="{% url 'delete_product' product.pk %}">Delete</a></article>{% endfor %}
+</div>
+{% else %}
+<section class="empty">
+    <h2>No products yet</h2><p>Create your first product to begin.</p>
+</section>
+{% endif %}
+{% endblock %}
