@@ -35,9 +35,6 @@ class Address(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        ordering = ["-is_default", "-updated_at"]
-
     def __str__(self):
         return f"{self.recipient_name} — {self.city}"
 

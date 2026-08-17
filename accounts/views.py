@@ -5,7 +5,7 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
-from rest_framework import generics, permissions, serializers, status
+from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -34,21 +34,10 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return profile
 
 
-class AddressListCreateAPIView(generics.ListCreateAPIView):
+class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-    def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-
-class AddressDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = AddressSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
+    
     def get_queryset(self):
         return Address.objects.filter(user=self.request.user)
 

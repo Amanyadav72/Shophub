@@ -1,8 +1,7 @@
 from django.urls import path
-
+from rest_framework.routers import DefaultRouter
 from .views import (
-    AddressDetailAPIView,
-    AddressListCreateAPIView,
+    AddressViewSet,
     CsrfCookieAPIView,
     LoginAPIView,
     LogoutAPIView,
@@ -14,7 +13,10 @@ from .views import (
     RegisterAPIView,
 )
 
-urlpatterns = [
+router = DefaultRouter()
+router.register("addresses", AddressViewSet, basename="address")
+
+urlpatterns = router.urls + [
     path("auth/csrf/", CsrfCookieAPIView.as_view(), name="api-auth-csrf"),
     path("auth/register/", RegisterAPIView.as_view(), name="api-auth-register"),
     path("auth/login/", LoginAPIView.as_view(), name="api-auth-login"),
@@ -24,6 +26,4 @@ urlpatterns = [
     path("auth/password/reset/", PasswordResetAPIView.as_view(), name="api-auth-password-reset"),
     path("auth/password/reset/confirm/", PasswordResetConfirmAPIView.as_view(), name="api-auth-password-reset-confirm"),
     path("profile/", ProfileAPIView.as_view(), name="api-profile"),
-    path("addresses/", AddressListCreateAPIView.as_view(), name="api-address-list"),
-    path("addresses/<int:pk>/", AddressDetailAPIView.as_view(), name="api-address-detail"),
 ]
