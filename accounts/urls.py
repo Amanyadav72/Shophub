@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (
     AddressViewSet,
     CsrfCookieAPIView,
@@ -17,6 +18,8 @@ router = DefaultRouter()
 router.register("addresses", AddressViewSet, basename="address")
 
 urlpatterns = router.urls + [
+    path("token/", TokenObtainPairView.as_view(), name="token"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("auth/csrf/", CsrfCookieAPIView.as_view(), name="api-auth-csrf"),
     path("auth/register/", RegisterAPIView.as_view(), name="api-auth-register"),
     path("auth/login/", LoginAPIView.as_view(), name="api-auth-login"),
