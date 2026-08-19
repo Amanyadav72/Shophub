@@ -15,6 +15,7 @@ from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
+from datetime import timedelta
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
@@ -61,6 +62,13 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'products.exceptions.custom_exception_handler',
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ShopHub API',
     'DESCRIPTION': 'Single-store e-commerce API. Products are managed only through the staff Django site.',
@@ -86,6 +94,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
