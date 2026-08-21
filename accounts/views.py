@@ -1,14 +1,18 @@
-from django.contrib.auth import authenticate, get_user_model, login, logout, update_session_auth_hash
+from django.db import transaction
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken,
+)
 
 from .models import Address, CustomerProfile
 from .serializers import (
@@ -20,10 +24,6 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
 )
-
-
-class EmptySerializer(serializers.Serializer):
-    pass
 
 
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
@@ -63,28 +63,45 @@ class RegisterAPIView(generics.CreateAPIView):
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
-@method_decorator(ensure_csrf_cookie, name="dispatch")
-class CsrfCookieAPIView(APIView):
-    permission_classes = (permissions.AllowAny,)
-
-    @extend_schema(responses={204: None}, summary="Set the CSRF cookie required for session-authenticated requests")
-    def get(self, request):
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@method_decorator(csrf_protect, name="dispatch")
 class LoginAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    @extend_schema(request={"application/json": {"type": "object", "properties": {"username": {"type": "string"}, "password": {"type": "string", "format": "password"}}, "required": ["username", "password"]}}, responses=UserSerializer, summary="Log in and create a Django session")
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "username": {"type": "string"},
+                    "password": {"type": "string", "format": "password"},
+                },
+                "required": ["username", "password"],
+            }
+        },
+        summary="Log in customer and return JWT pair with user details",
+    )
     def post(self, request):
         username = request.data.get("username", "")
         password = request.data.get("password", "")
-        user = authenticate(request, username=username, password=password)
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password,
+        )
+
         if user is None:
-            return Response({"detail": "Invalid username or password."}, status=status.HTTP_400_BAD_REQUEST)
-        login(request, user)
-        return Response(UserSerializer(user).data)
+            return Response(
+                {"detail": "Invalid username or password."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
 
 
 class LogoutAPIView(APIView):
@@ -111,16 +128,24 @@ class LogoutAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+def blacklist_user_refresh_tokens(user):
+    tokens = OutstandingToken.objects.filter(user=user)
+
+    for token in tokens:
+        BlacklistedToken.objects.get_or_create(token=token)
+
+
 class PasswordChangeAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     @extend_schema(request=PasswordChangeSerializer, responses={204: None}, summary="Change the current user's password")
+    @transaction.atomic
     def post(self, request):
         serializer = PasswordChangeSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data["new_password"])
         request.user.save(update_fields=["password"])
-        update_session_auth_hash(request, request.user)
+        blacklist_user_refresh_tokens(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -140,6 +165,7 @@ class PasswordResetConfirmAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     @extend_schema(request=PasswordResetConfirmSerializer, responses={204: None}, summary="Set a new password using a reset token")
+    @transaction.atomic
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -151,11 +177,11 @@ class PasswordResetConfirmAPIView(APIView):
         if not default_token_generator.check_token(user, serializer.validated_data["token"]):
             return Response({"token": ["Invalid or expired reset token."]}, status=status.HTTP_400_BAD_REQUEST)
         password = serializer.validated_data["new_password"]
-        from django.contrib.auth.password_validation import validate_password
         try:
             validate_password(password, user)
         except Exception as error:
             return Response({"new_password": list(error.messages)}, status=status.HTTP_400_BAD_REQUEST)
         user.set_password(password)
         user.save(update_fields=["password"])
+        blacklist_user_refresh_tokens(user)
         return Response(status=status.HTTP_204_NO_CONTENT)

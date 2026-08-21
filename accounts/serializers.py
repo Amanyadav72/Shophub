@@ -99,3 +99,9 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True, style={"input_type": "password"})
+
+    def validate_new_password(self, value):
+        # Basic validators run here. User-specific validation runs in the view
+        # after the UID has been decoded.
+        validate_password(value)
+        return value
