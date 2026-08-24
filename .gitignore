@@ -10,6 +10,7 @@ venv/
 venvDj/
 
 # Django
+shophub_backup_final.json
 db.sqlite3
 *.sqlite3
 media/
