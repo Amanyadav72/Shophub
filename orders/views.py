@@ -13,7 +13,7 @@ from .services import checkout
 class CheckoutAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    @extend_schema(request=CheckoutSerializer, responses=OrderSerializer, summary="Create an order from the current cart")
+    @extend_schema(request=CheckoutSerializer, responses=OrderSerializer, summary="Create an order from the current cart and removes product from cart")
     def post(self, request):
         serializer = CheckoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
