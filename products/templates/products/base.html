@@ -2,35 +2,92 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}ShopHub{% endblock %}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
     </head>
-<body>
-    <header>
-        <nav class="container nav">
-            <a class="brand" href="{% url 'home' %}">ShopHub</a>
-            <div class="nav-links">
-                <a href="{% url 'home' %}">Shop</a>
-                {% if user.is_authenticated %}
-                  <a href="{% url 'my_products' %}">My Products</a>
-                  <a href="{% url 'seller_profile' %}">Profile</a>
-                  <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button class="link-button" type="submit">Log out</button>
-                  </form>
-                {% else %}
-                  <a href="{% url 'login' %}">Log in</a>
-                  <a class="button" href="{% url 'register' %}">Create account</a>
-                {% endif %}
+    <body>
+        <header class="header">
+            <div class="container">
+                <nav class="navbar">
+                    <div class="nav-left">
+                        <a class="logo" href="{% url 'home' %}">
+                            <i class="fas fa-shopping-bag"></i> ShopHub
+                        </a>
+                    </div>
+                    
+                    <div class="nav-center">
+                        <a href="{% url 'home' %}" class="nav-link">
+                            <i class="fas fa-store"></i> Shop
+                        </a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'my_products' %}" class="nav-link">
+                                <i class="fas fa-box"></i> My Products
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="nav-right">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'seller_profile' %}" class="nav-link">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <form method="post" action="{% url 'logout' %}" class="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                            <a href="{% url 'product_form' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Sell Product
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="nav-link">Log In</a>
+                            <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+                        {% endif %}
+                    </div>
+                </nav>
             </div>
-        </nav>
-    </header>
-    <main class="container">
-        {% if messages %}{% for message in messages %}
-         <div class="message">{{ message }}</div>
-        {% endfor %}{% endif %}{% block content %}{% endblock %}
-    </main>
-    <footer class="container">ShopHub · Django storefront</footer>
-</body>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h4>ShopHub</h4>
+                        <p>Your trusted online marketplace for quality products</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="{% url 'home' %}">Shop</a></li>
+                            {% if user.is_authenticated %}
+                                <li><a href="{% url 'my_products' %}">My Products</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 ShopHub · Your Modern Storefront</p>
+                </div>
+            </div>
+        </footer>
+    </body>
 </html>
