@@ -1,16 +1,80 @@
 {% extends "products/base.html" %}
 {% block title %}My Products · ShopHub{% endblock %}
+
 {% block content %}
 <div class="heading">
-    <h1>My Products</h1><a class="button" href="{% url 'product_form' %}">Add product</a>
+    <div>
+        <h1>
+            <i class="fas fa-box"></i>
+            My Products
+        </h1>
+        <p style="color: var(--text-light); margin-top: 0.5rem;">
+            Manage your listed products
+        </p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'product_form' %}" title="Add a new product">
+        <i class="fas fa-plus"></i>
+        <span>Add Product</span>
+    </a>
 </div>
+
 {% if products %}
-<div class="grid">
-    {% for product in products %}<article class="card">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}<h2>{{ product.name }}</h2><p>₹{{ product.price }} · {{ product.stock }} in stock</p><p>{{ product.get_status_display }}</p><a href="{% url 'edit_product' product.pk %}">Edit</a> · <a class="danger" href="{% url 'delete_product' product.pk %}">Delete</a></article>{% endfor %}
-</div>
+    <div class="grid">
+        {% for product in products %}
+            <article class="card">
+                {% if product.image %}
+                    <img 
+                        src="{{ product.image.url }}" 
+                        alt="{{ product.name }}"
+                        loading="lazy"
+                    >
+                {% else %}
+                    <div style="width: 100%; height: 170px; background: var(--light); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2rem; margin-bottom: 0.75rem;">
+                        <i class="fas fa-image"></i>
+                    </div>
+                {% endif %}
+                
+                <h2>
+                    <a href="{% url 'product_detail' product.pk %}" style="color: inherit; text-decoration: none;">
+                        {{ product.name }}
+                    </a>
+                </h2>
+                
+                <p style="color: var(--primary); font-weight: 700; margin: 0.5rem 0;">
+                    ₹{{ product.price }} 
+                    <span style="color: var(--text-light); font-weight: 400;">
+                        • {{ product.stock }} in stock
+                    </span>
+                </p>
+                
+                <p style="margin: 0.5rem 0;">
+                    <span class="category-badge">{{ product.get_status_display }}</span>
+                </p>
+                
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-outline" style="flex: 1; text-align: center;">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </a>
+                    <a href="{% url 'delete_product' product.pk %}" class="btn btn-danger" style="flex: 1; text-align: center;" onclick="return confirm('Are you sure?')">
+                        <i class="fas fa-trash"></i>
+                        <span>Delete</span>
+                    </a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
 {% else %}
-<section class="empty">
-    <h2>No products yet</h2><p>Create your first product to begin.</p>
-</section>
+    <section class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-inbox"></i>
+        </div>
+        <h2>No Products Yet</h2>
+        <p>You haven't listed any products. Start selling by creating your first product!</p>
+        <a href="{% url 'product_form' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            <span>Create Your First Product</span>
+        </a>
+    </section>
 {% endif %}
 {% endblock %}

@@ -4,8 +4,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="ShopHub - Your modern online marketplace">
         <title>{% block title %}ShopHub{% endblock %}</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-v/lSR5McqrSH0v3vF9Z9D6v2+ZyLDAJqAHZ1e/PrcEqBCXVx8THLvLSzBIbPK29G2s/AInGEjCv1+zOhBmA5A==" crossorigin="anonymous" referrerpolicy="no-referrer">
         <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
     </head>
     <body>
@@ -13,39 +14,55 @@
             <div class="container">
                 <nav class="navbar">
                     <div class="nav-left">
-                        <a class="logo" href="{% url 'home' %}">
-                            <i class="fas fa-shopping-bag"></i> ShopHub
+                        <a class="logo" href="{% url 'home' %}" title="Go to homepage">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>ShopHub</span>
                         </a>
                     </div>
                     
                     <div class="nav-center">
-                        <a href="{% url 'home' %}" class="nav-link">
-                            <i class="fas fa-store"></i> Shop
+                        <a href="{% url 'home' %}" class="nav-link" title="Browse all products">
+                            <i class="fas fa-store"></i>
+                            <span>Shop</span>
                         </a>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'my_products' %}" class="nav-link">
-                                <i class="fas fa-box"></i> My Products
+                            <a href="{% url 'my_products' %}" class="nav-link" title="View your products">
+                                <i class="fas fa-box"></i>
+                                <span>My Products</span>
                             </a>
                         {% endif %}
                     </div>
 
                     <div class="nav-right">
                         {% if user.is_authenticated %}
-                            <a href="{% url 'seller_profile' %}" class="nav-link">
-                                <i class="fas fa-user-circle"></i> Profile
+                            <a href="{% url 'seller_profile' %}" class="nav-link" title="View your profile">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ user.username }}</span>
+                            </a>
+                            <a href="{% url 'change_password' %}" class="nav-link" title="Change your password">
+                                <i class="fas fa-key"></i>
+                                <span>Security</span>
                             </a>
                             <form method="post" action="{% url 'logout' %}" class="logout-form">
                                 {% csrf_token %}
-                                <button type="submit" class="nav-link logout-btn">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                <button type="submit" class="logout-btn" title="Log out">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
                                 </button>
                             </form>
-                            <a href="{% url 'product_form' %}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Sell Product
+                            <a href="{% url 'product_form' %}" class="btn btn-primary" title="List a new product">
+                                <i class="fas fa-plus"></i>
+                                <span>Sell Product</span>
                             </a>
                         {% else %}
-                            <a href="{% url 'login' %}" class="nav-link">Log In</a>
-                            <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+                            <a href="{% url 'login' %}" class="nav-link" title="Log in to your account">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Log In</span>
+                            </a>
+                            <a href="{% url 'register' %}" class="btn btn-primary" title="Create a new account">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Sign Up</span>
+                            </a>
                         {% endif %}
                     </div>
                 </nav>
@@ -58,7 +75,7 @@
                     {% for message in messages %}
                         <div class="alert alert-success">
                             <i class="fas fa-check-circle"></i>
-                            {{ message }}
+                            <span>{{ message }}</span>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -71,21 +88,32 @@
             <div class="container">
                 <div class="footer-content">
                     <div class="footer-section">
-                        <h4>ShopHub</h4>
-                        <p>Your trusted online marketplace for quality products</p>
+                        <h4><i class="fas fa-shopping-bag"></i> ShopHub</h4>
+                        <p>Your trusted online marketplace for quality products. Buy and sell with confidence.</p>
                     </div>
                     <div class="footer-section">
                         <h4>Quick Links</h4>
                         <ul>
-                            <li><a href="{% url 'home' %}">Shop</a></li>
+                            <li><a href="{% url 'home' %}">Browse Products</a></li>
                             {% if user.is_authenticated %}
                                 <li><a href="{% url 'my_products' %}">My Products</a></li>
+                                <li><a href="{% url 'seller_profile' %}">My Profile</a></li>
+                            {% else %}
+                                <li><a href="{% url 'register' %}">Create Account</a></li>
                             {% endif %}
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a href="#about">About Us</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                            <li><a href="#privacy">Privacy Policy</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="footer-bottom">
-                    <p>&copy; 2024 ShopHub · Your Modern Storefront</p>
+                    <p>&copy; 2024 ShopHub. All rights reserved. | Built with care for your shopping experience.</p>
                 </div>
             </div>
         </footer>

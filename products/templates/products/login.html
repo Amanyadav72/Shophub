@@ -1,1 +1,65 @@
-{% extends "products/base.html" %}{% block title %}Log in · ShopHub{% endblock %}{% block content %}<section class="form-card"><h1>Log in</h1><form method="post">{% csrf_token %}{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}{{ form.as_p }}<button class="button" type="submit">Log in</button></form><p><a href="{% url 'password_reset' %}">Forgot password?</a></p></section>{% endblock %}
+{% extends "products/base.html" %}
+{% block title %}Log In · ShopHub{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Welcome Back</h1>
+    <p style="text-align: center; color: var(--text-light); margin-bottom: 1.5rem;">
+        <i class="fas fa-user-circle"></i> Log in to your account
+    </p>
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong>Login Failed</strong>
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        {% for field in form %}
+            <div>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <div class="alert alert-danger" style="margin-top: 0.5rem;">
+                        {% for error in field.errors %}
+                            <small><i class="fas fa-times-circle"></i> {{ error }}</small><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+        
+        <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem;">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Log In</span>
+        </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <p style="text-align: center; margin-bottom: 1rem;">
+            <a href="{% url 'password_reset' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                <i class="fas fa-key"></i>
+                Forgot your password?
+            </a>
+        </p>
+        <p style="text-align: center; color: var(--text-light);">
+            Don't have an account?
+            <a href="{% url 'register' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                Create one now
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

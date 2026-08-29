@@ -1,16 +1,16 @@
 {% extends "products/base.html" %}
-{% block title %}ShopHub · Discover Quality Products{% endblock %}
+{% block title %}Discover Quality Products · ShopHub{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
     <div class="hero-content">
         <h1>Discover Amazing Products</h1>
-        <p>Find everything you need from trusted sellers</p>
+        <p>Find everything you need from trusted sellers worldwide</p>
     </div>
 </section>
 
-<!-- Search & Main Controls -->
+<!-- Search Section -->
 <div class="search-section">
     <form method="get" action="{% url 'home' %}" class="search-form">
         <div class="search-wrapper">
@@ -21,16 +21,19 @@
                 value="{{ request.GET.q }}" 
                 placeholder="Search products, brands, categories..."
                 class="search-input"
+                autocomplete="off"
             >
-            <button type="submit" class="btn btn-primary">Search</button>
+            {% if request.GET.ordering %}
+                <input type="hidden" name="ordering" value="{{ request.GET.ordering }}">
+            {% endif %}
+            {% if request.GET.category %}
+                <input type="hidden" name="category" value="{{ request.GET.category }}">
+            {% endif %}
         </div>
-        
-        {% if request.GET.category %}
-            <input type="hidden" name="category" value="{{ request.GET.category }}">
-        {% endif %}
-        {% if request.GET.ordering %}
-            <input type="hidden" name="ordering" value="{{ request.GET.ordering }}">
-        {% endif %}
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </button>
     </form>
 </div>
 
@@ -47,13 +50,17 @@
                     <a 
                         href="?q={{ request.GET.q|urlencode }}&category={{ category.name|urlencode }}&ordering={{ request.GET.ordering|urlencode }}"
                         class="category-tag {% if request.GET.category == category.name %}active{% endif %}"
+                        title="Filter by {{ category.name }}"
                     >
                         {{ category.name }}
                     </a>
                 {% endfor %}
-                {% if request.GET.category %}
-                    <a href="{% url 'home' %}" class="category-tag clear-tag">
-                        <i class="fas fa-times"></i> Clear
+                
+                <!-- Clear Filter Button - Always Show When Filtered -->
+                {% if request.GET.category or request.GET.q or request.GET.ordering %}
+                    <a href="{% url 'home' %}" class="category-tag clear-tag" title="Clear all filters">
+                        <i class="fas fa-times"></i>
+                        <span>Clear All</span>
                     </a>
                 {% endif %}
             </div>
@@ -70,20 +77,26 @@
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=-created_at"
                     class="sort-link {% if request.GET.ordering == '-created_at' %}active{% endif %}"
+                    title="Show newest products first"
                 >
-                    <i class="fas fa-star"></i> Newest
+                    <i class="fas fa-star"></i>
+                    <span>Newest</span>
                 </a>
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=price"
                     class="sort-link {% if request.GET.ordering == 'price' %}active{% endif %}"
+                    title="Sort by price: low to high"
                 >
-                    <i class="fas fa-arrow-down"></i> Price: Low to High
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Price: Low to High</span>
                 </a>
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering=-price"
                     class="sort-link {% if request.GET.ordering == '-price' %}active{% endif %}"
+                    title="Sort by price: high to low"
                 >
-                    <i class="fas fa-arrow-up"></i> Price: High to Low
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Price: High to Low</span>
                 </a>
             </div>
         </div>
@@ -93,7 +106,11 @@
 <!-- Products Grid -->
 {% if products %}
     <div class="products-header">
-        <h2>Products <span class="product-count">({{ products|length }} items)</span></h2>
+        <h2>
+            <i class="fas fa-cube"></i>
+            Products 
+            <span class="product-count">({{ products|length }} item{{ products|length|pluralize }})</span>
+        </h2>
     </div>
 
     <div class="products-grid">
@@ -105,6 +122,7 @@
                             src="{{ product.image.url }}" 
                             alt="{{ product.name }}"
                             class="product-image"
+                            loading="lazy"
                         >
                     {% else %}
                         <div class="product-image-placeholder">
@@ -115,22 +133,25 @@
                 
                 <div class="product-info">
                     <h3 class="product-name">
-                        <a href="{% url 'product_detail' product.pk %}">
+                        <a href="{% url 'product_detail' product.pk %}" title="View product details">
                             {{ product.name }}
                         </a>
                     </h3>
                     
-                    <div class="product-categories">
-                        {% for category in product.categories.all %}
-                            <span class="category-badge">{{ category.name }}</span>
-                        {% endfor %}
-                    </div>
+                    {% if product.categories.all %}
+                        <div class="product-categories">
+                            {% for category in product.categories.all %}
+                                <span class="category-badge">{{ category.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     
                     <div class="product-footer">
                         <span class="product-price">₹{{ product.price }}</span>
                         <a 
                             href="{% url 'product_detail' product.pk %}" 
                             class="btn btn-outline"
+                            title="View details"
                         >
                             View
                         </a>
@@ -147,14 +168,18 @@
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page=1"
                     class="pagination-btn"
+                    title="Go to first page"
                 >
-                    <i class="fas fa-chevron-left"></i> First
+                    <i class="fas fa-chevron-left"></i>
+                    <span>First</span>
                 </a>
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page={{ page_obj.previous_page_number }}"
                     class="pagination-btn"
+                    title="Go to previous page"
                 >
-                    <i class="fas fa-chevron-left"></i> Previous
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
                 </a>
             {% endif %}
 
@@ -166,14 +191,18 @@
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page={{ page_obj.next_page_number }}"
                     class="pagination-btn"
+                    title="Go to next page"
                 >
-                    Next <i class="fas fa-chevron-right"></i>
+                    <span>Next</span>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
                 <a 
                     href="?q={{ request.GET.q|urlencode }}&category={{ request.GET.category|urlencode }}&ordering={{ request.GET.ordering|urlencode }}&page={{ page_obj.paginator.num_pages }}"
                     class="pagination-btn"
+                    title="Go to last page"
                 >
-                    Last <i class="fas fa-chevron-right"></i>
+                    <span>Last</span>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
             {% endif %}
         </div>
@@ -185,8 +214,11 @@
             <i class="fas fa-inbox"></i>
         </div>
         <h2>No Products Found</h2>
-        <p>Try adjusting your search or filters</p>
-        <a href="{% url 'home' %}" class="btn btn-primary">Browse All Products</a>
+        <p>We couldn't find any products matching your search. Try adjusting your filters or search term.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">
+            <i class="fas fa-redo"></i>
+            <span>Browse All Products</span>
+        </a>
     </section>
 {% endif %}
 

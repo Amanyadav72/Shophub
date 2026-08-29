@@ -1,1 +1,65 @@
-{% extends "products/base.html" %}{% block title %}Profile · ShopHub{% endblock %}{% block content %}<section class="form-card"><h1>{{ user.username }}'s seller profile</h1><p><strong>Phone:</strong> {{ profile.phone|default:"Not added" }}</p><p><strong>Address:</strong> {{ profile.address|default:"Not added" }}</p><p><strong>Bio:</strong> {{ profile.bio|default:"Not added" }}</p><a class="button" href="{% url 'seller_profile_edit' %}">Edit profile</a></section>{% endblock %}
+{% extends "products/base.html" %}
+{% block title %}My Profile · ShopHub{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>
+        <i class="fas fa-user-circle"></i>
+        {{ user.get_full_name|default:user.username }}'s Profile
+    </h1>
+    
+    <div style="margin-top: 2rem;">
+        <div style="margin-bottom: 1.5rem;">
+            <h3 style="color: var(--text-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                Email
+            </h3>
+            <p style="margin: 0; font-weight: 500;">{{ user.email }}</p>
+        </div>
+        
+        {% if profile %}
+            {% if profile.phone %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--text-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        <i class="fas fa-phone"></i> Phone
+                    </h3>
+                    <p style="margin: 0; font-weight: 500;">{{ profile.phone }}</p>
+                </div>
+            {% endif %}
+            
+            {% if profile.address %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--text-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        <i class="fas fa-map-marker-alt"></i> Address
+                    </h3>
+                    <p style="margin: 0; font-weight: 500;">{{ profile.address }}</p>
+                </div>
+            {% endif %}
+            
+            {% if profile.bio %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--text-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        <i class="fas fa-align-left"></i> Bio
+                    </h3>
+                    <p style="margin: 0; font-weight: 500;">{{ profile.bio }}</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <p style="color: var(--text-light); font-style: italic;">
+                <i class="fas fa-info-circle"></i>
+                No seller profile information yet. Complete your profile to attract more buyers.
+            </p>
+        {% endif %}
+    </div>
+    
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a class="btn btn-primary" href="{% url 'seller_profile_edit' %}" style="flex: 1; min-width: 150px;">
+            <i class="fas fa-edit"></i>
+            <span>Edit Profile</span>
+        </a>
+        <a class="btn btn-secondary" href="{% url 'change_password' %}" style="flex: 1; min-width: 150px;">
+            <i class="fas fa-lock"></i>
+            <span>Change Password</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
