@@ -3,10 +3,10 @@
    ======================================== */
 :root {
     /* Teal Color Theme */
-    --primary: #0d9488;
-    --primary-light: #14b8a6;
-    --primary-dark: #0f766e;
-    --secondary: #06b6d4;
+    --primary: #170202;
+    --primary-light: #0c1365;
+    --primary-dark: #042604;
+    --secondary: #052d35;
     --accent: #ec4899;
     --success: #10b981;
     --warning: #f59e0b;
@@ -132,22 +132,41 @@ body {
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
-    background: none;
-    border: none;
+    width: 44px;
+    height: 44px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1.5rem;
-    color: var(--text);
-    padding: 0.5rem;
-    -webkit-flex-shrink: 0;
-    -moz-flex-shrink: 0;
+    color: var(--dark);
+    padding: 0;
     flex-shrink: 0;
-    -webkit-transition: var(--transition);
-    -moz-transition: var(--transition);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1100;
     transition: var(--transition);
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-.mobile-menu-toggle:hover {
+.mobile-menu-toggle i {
+    display: block;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--dark);
+}
+
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:focus {
     color: var(--primary);
+    border-color: var(--primary);
+    background: var(--light);
+}
+
+.mobile-menu-toggle:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 /* Navigation Menu */
@@ -227,22 +246,22 @@ body {
     -webkit-align-items: center;
     -moz-align-items: center;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--text);
+    gap: 1rem;
+    color: var(--danger);
     text-decoration: none;
     border-radius: 6px;
     -webkit-transition: var(--transition);
     -moz-transition: var(--transition);
     transition: var(--transition);
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     white-space: nowrap;
 }
 
 .logout-btn:hover,
 .logout-btn:focus {
-    color: var(--primary);
-    background-color: rgba(13, 148, 136, 0.08);
+    color: var(--white);
+    background-color: var(--danger);
 }
 
 /* ========================================
@@ -688,7 +707,7 @@ body {
 .product-image-wrapper {
     position: relative;
     width: 100%;
-    height: 180px;
+    height: 100%;
     overflow: hidden;
     background: var(--light);
 }
@@ -1149,73 +1168,58 @@ textarea {
 /* ========================================
    Responsive Design
    ======================================== */
-@media (max-width: 1024px) {
-    .nav-link span,
-    .logout-btn span,
-    .btn span {
-        display: none;
-    }
-
-    .nav-link,
-    .logout-btn,
-    .btn {
-        padding: 0.5rem;
-    }
-
-    .btn-sell,
-    .btn-signup {
-        display: inline-flex;
-    }
-
-    .btn-sell span,
-    .btn-signup span {
-        display: inline;
-    }
-}
-
 @media (max-width: 768px) {
     .mobile-menu-toggle {
-        display: block;
+        display: flex;
+    }
+
+    .navbar {
+        min-height: 64px;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .logo-text {
+        display: inline;
     }
 
     .nav-menu {
         position: absolute;
-        top: 70px;
+        top: 100%;
         left: 0;
         right: 0;
-        background: var(--white);
-        border-bottom: 1px solid var(--border);
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
-        flex-direction: column;
         width: 100%;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        flex-direction: column;
         gap: 0;
         max-height: 0;
         overflow: hidden;
-        -webkit-transition: max-height 0.3s ease;
-        -moz-transition: max-height 0.3s ease;
-        transition: max-height 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+        box-shadow: var(--shadow-lg);
+        transition: max-height 0.3s ease, opacity 0.2s ease, visibility 0.2s ease;
+        z-index: 1050;
     }
 
     .nav-menu.active {
         max-height: 600px;
+        opacity: 1;
+        visibility: visible;
     }
 
     .nav-center {
         width: 100%;
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
         flex-direction: column;
-        -webkit-justify-content: flex-start;
-        -moz-justify-content: flex-start;
         justify-content: flex-start;
         border-bottom: 1px solid var(--border);
     }
 
     .nav-right {
         width: 100%;
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
         flex-direction: column;
         gap: 0.5rem;
         padding: 1rem;
@@ -1225,8 +1229,6 @@ textarea {
         width: 100%;
         padding: 0.75rem 1rem;
         border-radius: 0;
-        -webkit-justify-content: flex-start;
-        -moz-justify-content: flex-start;
         justify-content: flex-start;
     }
 
@@ -1238,8 +1240,6 @@ textarea {
         width: 100%;
         padding: 0.75rem 1rem;
         border-radius: 0;
-        -webkit-justify-content: flex-start;
-        -moz-justify-content: flex-start;
         justify-content: flex-start;
     }
 
@@ -1256,21 +1256,6 @@ textarea {
         display: inline;
     }
 
-    .navbar {
-        min-height: auto;
-        -webkit-flex-wrap: nowrap;
-        -moz-flex-wrap: nowrap;
-        flex-wrap: nowrap;
-    }
-
-    .logo-text {
-        display: none;
-    }
-
-    .logo {
-        font-size: 1.2rem;
-    }
-
     .hero {
         padding: 2rem 1rem;
     }
@@ -1285,7 +1270,7 @@ textarea {
 
     .search-section {
         position: sticky;
-        top: 70px;
+        top: 64px;
         background: var(--white);
         z-index: 100;
         padding: 1rem 0;
@@ -1408,12 +1393,16 @@ textarea {
     }
 
     .logo {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
     }
 
     .mobile-menu-toggle {
-        font-size: 1.3rem;
-        padding: 0.4rem;
+        width: 42px;
+        height: 42px;
+    }
+
+    .mobile-menu-toggle i {
+        font-size: 1.2rem;
     }
 
     .hero {
@@ -1444,8 +1433,8 @@ textarea {
     }
 
     .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
     }
 
     .product-card {
@@ -1467,6 +1456,15 @@ textarea {
 
     .product-price {
         font-size: 1.1rem;
+    }
+
+    .product-footer {
+        gap: 0.4rem;
+    }
+
+    .product-footer .btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.8rem;
     }
 
     .btn {
@@ -1521,11 +1519,7 @@ textarea {
     }
 
     .heading {
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: stretch;
-        -moz-align-items: stretch;
         align-items: stretch;
     }
 
