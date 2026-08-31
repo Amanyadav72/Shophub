@@ -99,7 +99,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'shophub.middleware.RequestIDMiddleware',
+    'shophub.middleware.RequestTimingMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
