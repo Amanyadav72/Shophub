@@ -1,7 +1,9 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from .models import Order
+from django.db import transaction
 
+@transaction.atomic  # All or nothing
 @receiver(pre_save, sender=Order)
 def restock_on_cancellation(sender, instance, **kwargs):
     # Skip if this is a brand new order being created
@@ -9,7 +11,7 @@ def restock_on_cancellation(sender, instance, **kwargs):
         return
         
     try:
-        old_order = Order.objects.get(id=instance.id)
+        old_order = Order.objects.select_for_update().get(id=instance.id)
     except Order.DoesNotExist:
         return
 
