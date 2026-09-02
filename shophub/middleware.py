@@ -6,6 +6,7 @@ class RequestTimingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        request.client_timezone = "IST"
         start_time = time.perf_counter()
 
         response = self.get_response(request)
