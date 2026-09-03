@@ -82,7 +82,7 @@ class MyProductListView(SellerRequiredMixin, ListView):
     model = Product
     template_name = "products/my_products.html"
     context_object_name = "products"
-    paginate_by = 8
+    paginate_by = 6
 
     def get_queryset(self):
         return Product.objects.by_owner(self.request.user).prefetch_related("categories")
