@@ -199,6 +199,6 @@ def seller_profile_edit(request):
     form = SellerProfileForm(request.POST or None, instance=profile)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Profile updated.")
+        messages.success(request, "Profile updated Succesfully.")
         return redirect("seller_profile")
     return render(request, "products/profile_form.html", {"form": form})
