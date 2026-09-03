@@ -116,7 +116,7 @@ class ProductUpdateView(OwnerProductMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, "Product updated.")
+        messages.success(self.request, "Product updated succesfully.")
         return response
 
 
