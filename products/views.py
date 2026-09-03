@@ -99,7 +99,7 @@ class ProductCreateView(SellerRequiredMixin, CreateView):
         form.instance.owner = self.request.user
 
         response = super().form_valid(form)
-        messages.success(self.request, "Product created.")
+        messages.success(self.request, "Product created succesfully.")
         return response
 
 
