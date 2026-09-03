@@ -1,6 +1,12 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import filters, viewsets
+from rest_framework.response import Response
+
+from products.cache import (
+    get_cached_product_response,
+    set_cached_product_response,
+)
 
 from products.filters import ProductFilter
 from products.models import Product
@@ -24,3 +30,28 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Product.objects.published().prefetch_related("categories").distinct()
+
+    def list(self, request, *args, **kwargs):
+        # Pass prefix="list"
+        cached_data = get_cached_product_response(request, prefix="list")
+        if cached_data is not None:
+            return Response(cached_data)
+
+        response = super().list(request, *args, **kwargs)
+        if response.status_code == 200:
+            set_cached_product_response(request, response.data, prefix="list")
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+            # Pass prefix="detail"
+            cached_data = get_cached_product_response(request, prefix="detail")
+            if cached_data is not None:
+                return Response(cached_data)
+    
+            response = super().retrieve(request, *args, **kwargs)
+            if response.status_code == 200:
+                set_cached_product_response(request, response.data, prefix="detail")
+            return response
+
+    
+
