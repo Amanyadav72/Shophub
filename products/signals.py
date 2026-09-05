@@ -15,10 +15,7 @@ def invalidate_product_cache_on_delete(sender, instance, **kwargs):
     invalidate_product_cache()
 
 
-@receiver(
-    m2m_changed,
-    sender=Product.categories.through,
-)
+@receiver(m2m_changed, sender=Product.categories.through)
 def invalidate_product_cache_on_category_change(sender, instance, action, **kwargs):
     if action in {"post_add", "post_remove", "post_clear"}:
         invalidate_product_cache()

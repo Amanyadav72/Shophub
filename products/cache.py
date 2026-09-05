@@ -1,7 +1,7 @@
 import hashlib
 from django.core.cache import cache
 
-PRODUCT_CACHE_TIMEOUT = 60
+PRODUCT_CACHE_TIMEOUT = 60*5
 PRODUCT_CACHE_VERSION_KEY = "products:catalog:version"
 
 def get_product_cache_version():

@@ -3,10 +3,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import filters, viewsets
 from rest_framework.response import Response
 
-from products.cache import (
-    get_cached_product_response,
-    set_cached_product_response,
-)
+from products.cache import get_cached_product_response, set_cached_product_response
 
 from products.filters import ProductFilter
 from products.models import Product
