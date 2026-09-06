@@ -52,5 +52,7 @@ def checkout(user, address_id):
         product.save(update_fields=("stock", "updated_at"))
     OrderItem.objects.bulk_create(order_items)
     CartItem.objects.filter(pk__in=[item.pk for item in items]).delete()
+
     send_order_confirmation_email.delay_on_commit(order.id)
+
     return order

@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
-
+from .tasks import send_password_reset_email
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -164,7 +164,12 @@ class PasswordResetAPIView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        
+        email = serializer.validated_data["email"]
+        user = get_user_model().objects.filter(email=email).first()
+        
+        if user:
+            send_password_reset_email.delay(user.id, domain=request.get_host())
         # Do not reveal whether an email address has an account.
         return Response(status=status.HTTP_204_NO_CONTENT)
 
