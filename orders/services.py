@@ -1,12 +1,11 @@
 from decimal import Decimal
-
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from accounts.models import Address
 from cart.models import CartItem
-from django.core.mail import send_mail
-from django.conf import settings
+
+from .tasks import send_order_confirmation_email
 
 from .models import Order, OrderItem
 
@@ -53,11 +52,5 @@ def checkout(user, address_id):
         product.save(update_fields=("stock", "updated_at"))
     OrderItem.objects.bulk_create(order_items)
     CartItem.objects.filter(pk__in=[item.pk for item in items]).delete()
-    send_mail(
-        subject=f"ShopHub Order Confirmation: {order.number}",
-        message=f"Hi {user.username},\n\nYour order {order.number} has been placed successfully!\nTotal: ${order.total}",
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[user.email],
-        fail_silently=False,
-    )
+    send_order_confirmation_email.delay_on_commit(order.id)
     return order
