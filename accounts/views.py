@@ -9,10 +9,10 @@ from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.token_blacklist.models import (
-    OutstandingToken,
-    BlacklistedToken,
-)
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Address, CustomerProfile
 from .serializers import (
@@ -60,6 +60,14 @@ class RegisterAPIView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        send_mail(
+            subject="Welcome to ShopHub!",
+            message=f"Hi {user.username},\n\nThank you for registering at ShopHub. We are excited to have you!",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
