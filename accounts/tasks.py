@@ -9,7 +9,12 @@ from django.utils.http import urlsafe_base64_encode
 
 User = get_user_model()
 
-@shared_task
+@shared_task(
+    autoretry_for=(ConnectionError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
 def send_password_reset_email(user_id, domain="127.0.0.1:8000"):
     try:
         user = User.objects.get(pk=user_id)
@@ -35,7 +40,12 @@ def send_password_reset_email(user_id, domain="127.0.0.1:8000"):
         fail_silently=False,
     )
 
-@shared_task
+@shared_task(
+    autoretry_for=(ConnectionError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
 def send_welcome_email(user_id):
     try:
         user = User.objects.get(pk=user_id)

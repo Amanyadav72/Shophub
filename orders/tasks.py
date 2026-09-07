@@ -4,7 +4,12 @@ from django.conf import settings
 from django.core.mail import send_mail
 from .models import Order
 
-@shared_task
+@shared_task(
+    autoretry_for=(ConnectionError,),
+    retry_backoff=True,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
 def send_order_confirmation_email(order_id):
     try:
         order = Order.objects.select_related("user").get(pk=order_id)
