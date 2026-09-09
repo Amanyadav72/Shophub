@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 
 from products.models import Product
 
@@ -21,3 +22,8 @@ class CartServiceTests(TestCase):
         add_item(self.user, self.product.id, 2)
         item = CartItem.objects.get(cart__user=self.user, product=self.product)
         self.assertEqual(item.quantity, 3)
+
+    def test_cannot_add_more_than_stock(self):
+        add_item(self.user, self.product.id, 5)
+        with self.assertRaises(ValidationError):
+            add_item(self.user, self.product.id, 1)

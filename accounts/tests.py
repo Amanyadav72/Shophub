@@ -18,22 +18,41 @@ class AccountAPITests(APITestCase):
         )
 
     def test_register_login_and_me(self):
+        # 1. Test Registration
         response = self.client.post("/api/v1/auth/register/", {
             "username": "new-customer", "email": "new@example.com", "password": "AnotherSecurePass123!",
         }, format="json")
         self.assertEqual(response.status_code, 201)
+        
+        # 2. Test Login
         response = self.client.post("/api/v1/auth/login/", {
             "username": "new-customer", "password": "AnotherSecurePass123!",
         }, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["username"], "new-customer")
+        self.assertEqual(response.data["user"]["username"], "new-customer")
+        
+        # NEW: Capture the tokens from the login response
+        access_token = response.data["access"]
+        refresh_token = response.data["refresh"]
+        
+        # NEW: Inject the access token into the client's Authorization header
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+        
+        # 3. Test /me/ endpoint (Client is now authenticated!)
         response = self.client.get("/api/v1/auth/me/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["username"], "new-customer")
-        response = self.client.post("/api/v1/auth/logout/", format="json")
+        
+        # 4. Test Logout (Pass the refresh token so it can be blacklisted)
+        response = self.client.post("/api/v1/auth/logout/", {"refresh": refresh_token}, format="json")
         self.assertEqual(response.status_code, 204)
+        
+        # NEW: Clear the client's credentials to simulate the frontend deleting the token
+        self.client.credentials() 
+        
+        # Verify the user is locked out
         response = self.client.get("/api/v1/auth/me/")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_customer_cannot_access_another_customers_address(self):
         other = get_user_model().objects.create_user(username="other", password="VerySecurePass123!")
