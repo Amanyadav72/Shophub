@@ -21,6 +21,14 @@ class ProductModelTests(TestCase):
         data.update(overrides)
         return Product(**data)
 
+    def test_product_can_be_created(self):
+        product = Product.objects.create(owner=self.owner, name="Laptop", description="Gaming laptop", price=Decimal("50000.00"), stock=5)
+
+        self.assertEqual(product.name, "Laptop")
+        self.assertEqual(product.owner, self.owner)
+        self.assertEqual(product.price, Decimal("50000.00"))
+        self.assertEqual(product.stock, 5)
+
     def test_owner_is_required(self):
         product = self.product(owner=None)
         with self.assertRaises(ValidationError):
