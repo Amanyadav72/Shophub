@@ -4,6 +4,7 @@ from django.test import TestCase
 from accounts.models import Address
 from cart.services import add_item
 from products.models import Product
+from rest_framework.test import APITestCase
 
 from .services import checkout
 
@@ -29,3 +30,20 @@ class CheckoutServiceTests(TestCase):
         self.assertFalse(user.cart.items.exists())
         product.refresh_from_db()
         self.assertEqual(product.stock, 1)
+
+class checkoutApiTests(APITestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="customer", password="secret")
+        self.address = Address.objects.create(
+            user=self.user,
+            recipient_name="Customer",
+            phone="9999999999",
+            line1="1 Main Street",
+            city="Delhi",
+            state="Delhi",
+            postal_code="110001",
+        )
+
+    def test_unauthenticated_user_cannot_checkout(self):
+        response = self.client.post("/api/v1/orders/checkout/", {"address_id": self.address.id}, format="json")
+        self.assertEqual(response.status_code, 401)
