@@ -27,3 +27,7 @@ staticfiles/
 .idea/
 .DS_Store
 Thumbs.db
+
+#coverage
+htmlcov/
+.coverage
