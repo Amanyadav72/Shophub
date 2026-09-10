@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from decimal import Decimal
 
 from accounts.models import Address
 from cart.services import add_item
 from products.models import Product
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 
 from .services import checkout
 
@@ -43,7 +45,33 @@ class checkoutApiTests(APITestCase):
             state="Delhi",
             postal_code="110001",
         )
+        self.product = Product.objects.create(
+            owner=self.user,
+            name="Mechanical Keyboard",
+            price=Decimal("1500.00"),
+            stock=10,
+            status=Product.Status.PUBLISHED,
+        )
+        # Put an item in the cart
+        add_item(self.user, self.product.id, 2)
+        
 
     def test_unauthenticated_user_cannot_checkout(self):
         response = self.client.post("/api/v1/orders/checkout/", {"address_id": self.address.id}, format="json")
         self.assertEqual(response.status_code, 401)
+
+    @patch("orders.services.send_order_confirmation_email.delay_on_commit")
+    def test_checkout_triggers_confirmation_email(self, mock_email_task):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            "/api/v1/orders/checkout/",
+            {"address_id": self.address.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+
+        # Verify Celery delay_on_commit was triggered exactly once
+        mock_email_task.assert_called_once()
+        # Extract order id from response data and verify task argument
+        order_id = response.data["id"]
+        mock_email_task.assert_called_with(order_id)
