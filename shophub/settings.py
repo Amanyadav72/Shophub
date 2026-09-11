@@ -49,6 +49,20 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = [host for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if host]
 
+# CORS Configuration for React Frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.0.104:3000",
+    "http://localhost:3000",      # React dev
+    "http://localhost:5173",      # Vite dev  
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+# Optional: For production, read from environment
+# CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies
+
 # Django REST Framework Global Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -101,9 +115,11 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'shophub.middleware.RequestTimingMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
