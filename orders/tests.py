@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from unittest.mock import patch
 
 from .services import checkout
+from cart.models import CartItem
 
 
 class CheckoutServiceTests(TestCase):
@@ -75,3 +76,20 @@ class checkoutApiTests(APITestCase):
         # Extract order id from response data and verify task argument
         order_id = response.data["id"]
         mock_email_task.assert_called_with(order_id)
+
+    
+
+    def test_checkout_fails_when_cart_is_empty(self):
+        # 1. ARRANGE: Authenticate and explicitly ensure cart has zero items
+        self.client.force_authenticate(user=self.user)
+        CartItem.objects.filter(cart__user=self.user).delete()
+
+        # 2. ACT: Attempt checkout
+        response = self.client.post(
+            "/api/v1/orders/checkout/",
+            {"address_id": self.address.id},
+            format="json",
+        )
+        # 3. ASSERT: Expect 400 Bad Request
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["detail"], "Your cart is empty.")
