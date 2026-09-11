@@ -44,7 +44,9 @@ class MeAPIView(generics.RetrieveUpdateAPIView):
 class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    
+    lookup_field = 'pk'
+    lookup_value_regex = r'\d+'
+
     def get_queryset(self):
         return Address.objects.filter(user=self.request.user)
 
