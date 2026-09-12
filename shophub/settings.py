@@ -75,7 +75,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',       # Unauthenticated requests
+        'anon': '500/day',       # Unauthenticated requests
         'user': '1000/day',      # Authenticated requests
     },
     # Standardized Response Handler
